@@ -2229,12 +2229,15 @@
                 }
 
                 // Append Client Confirmation Draft if Location is Intuit Dome
-                if (evt.location && evt.location.toLowerCase().includes('intuit') && GLOBAL_CLIENT_EMAIL) {
-                    let clientShiftLines = '';
-                    for (let time in shiftGroups) {
-                        clientShiftLines += '<tr>' +
-                            '<td style="padding: 10px 16px; border-bottom: 1px solid #eee; vertical-align: top;"><strong>' + time + '</strong><br><span style="color:#666;font-size:12px;">' + shiftGroups[time].length + ' staff</span></td>' +
-                            '<td style="padding: 10px 16px; border-bottom: 1px solid #eee;"><ul style="margin:0;padding-left:16px;">';
+                if (evt.location && evt.location.toLowerCase().includes('intuit')) {
+                    if (!GLOBAL_CLIENT_EMAIL) {
+                        showToast("Warning: Client draft skipped because Client Email is missing in Legend tab.", "warning");
+                    } else {
+                        let clientShiftLines = '';
+                        for (let time in shiftGroups) {
+                            clientShiftLines += '<tr>' +
+                                '<td style="padding: 10px 16px; border-bottom: 1px solid #eee; vertical-align: top;"><strong>' + time + '</strong><br><span style="color:#666;font-size:12px;">' + shiftGroups[time].length + ' staff</span></td>' +
+                                '<td style="padding: 10px 16px; border-bottom: 1px solid #eee;"><ul style="margin:0;padding-left:16px;">';
                         for (let p of shiftGroups[time]) {
                             clientShiftLines += '<li style="padding: 2px 0;">' + p + '</li>';
                         }
@@ -2267,6 +2270,7 @@
                         </div></div>`;
 
                     draftsToCreate.push({
+                        title: 'Client Confirmation Draft',
                         subject: 'Staff Confirmation — ' + eventNameClean + ' | ' + formattedDate,
                         htmlBody: clientBodyHTML,
                         bcc: GLOBAL_CLIENT_EMAIL
@@ -2278,7 +2282,8 @@
                     await createGmailDraftViaLambda(draft.subject, draft.htmlBody, draft.bcc);
                 }
 
-                showToast('✓ Draft created in your Gmail inbox!', 'success');
+                let extra = draftsToCreate.length > 1 ? ` (${draftsToCreate.length} drafts total)` : '';
+                showToast('✓ Draft created in your Gmail inbox!' + extra, 'success');
                 evt.status = 'Email Sent';
                 if (typeof renderEventsFromSheet === 'function') renderEventsFromSheet(EVENTS_DATA);
             } catch (e) {
