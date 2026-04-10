@@ -1978,7 +1978,7 @@
     </script>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzKHFoH63v4W6cm84On9Usg3pE1ah0e32Y7hdrjQGuWt6-idGUiWaphLtelJtNoh3cU/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwcmV3L-Ne-vRLle7K88N0cCMOIiJMBmRZ1KNPGgl2BM-kaOMK67DIYz5s217w_8J6V/exec';
         const LAMBDA_URL = 'https://s4fp3l63xk.execute-api.us-east-1.amazonaws.com';
 
         // ── AUTH ─────────────────────────────────────────────────
@@ -2356,7 +2356,7 @@
 
         async function fetchEvents() {
             try {
-                const res = await fetch(API_URL + '?action=getEvents&month=' + (currentMonth + 1) + '&year=' + currentYear);
+                const res = await fetch(API_URL + '?action=getEvents&month=' + (currentMonth + 1) + '&year=' + currentYear + '&t=' + Date.now());
                 const json = await res.json();
                 if (json.status === 'ok') {
                     EVENTS_DATA = json.data;
@@ -2383,7 +2383,7 @@
             }
             showLoading('page-events-list', 4);
             try {
-                const res = await fetch(API_URL + '?action=getEvents&month=' + (month + 1) + '&year=' + year);
+                const res = await fetch(API_URL + '?action=getEvents&month=' + (month + 1) + '&year=' + year + '&t=' + Date.now());
                 const json = await res.json();
                 if (json.status === 'ok') {
                     EVENTS_DATA = json.data;
