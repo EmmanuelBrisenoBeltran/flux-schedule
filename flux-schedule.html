@@ -2238,13 +2238,13 @@
                             clientShiftLines += '<tr>' +
                                 '<td style="padding: 10px 16px; border-bottom: 1px solid #eee; vertical-align: top;"><strong>' + time + '</strong><br><span style="color:#666;font-size:12px;">' + shiftGroups[time].length + ' staff</span></td>' +
                                 '<td style="padding: 10px 16px; border-bottom: 1px solid #eee;"><ul style="margin:0;padding-left:16px;">';
-                        for (let p of shiftGroups[time]) {
-                            clientShiftLines += '<li style="padding: 2px 0;">' + p + '</li>';
+                            for (let p of shiftGroups[time]) {
+                                clientShiftLines += '<li style="padding: 2px 0;">' + p + '</li>';
+                            }
+                            clientShiftLines += '</ul></td></tr>';
                         }
-                        clientShiftLines += '</ul></td></tr>';
-                    }
 
-                    const clientBodyHTML = `<div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; max-width: 600px;">
+                        const clientBodyHTML = `<div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; max-width: 600px;">
                         <div style="background: #1D3557; padding: 24px; border-radius: 8px 8px 0 0;">
                         <h2 style="color: white; margin: 0; font-size: 20px;">Staff Confirmation</h2>
                         <p style="color: #a8c4e0; margin: 4px 0 0 0;">Flux Consulting Group</p>
@@ -2269,13 +2269,14 @@
                         <p>Best regards,<br><strong>Flux Consulting Group</strong></p>
                         </div></div>`;
 
-                    draftsToCreate.push({
-                        title: 'Client Confirmation Draft',
-                        subject: 'Staff Confirmation — ' + eventNameClean + ' | ' + formattedDate,
-                        htmlBody: clientBodyHTML,
-                        bcc: GLOBAL_CLIENT_EMAIL
-                    });
-                }
+                        draftsToCreate.push({
+                            title: 'Client Confirmation Draft',
+                            subject: 'Staff Confirmation — ' + eventNameClean + ' | ' + formattedDate,
+                            htmlBody: clientBodyHTML,
+                            bcc: GLOBAL_CLIENT_EMAIL
+                        });
+                    } // close else block
+                } // close if block
 
                 // Create drafts via Lambda OAuth
                 for (const draft of draftsToCreate) {
