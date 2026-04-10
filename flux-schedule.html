@@ -1,0 +1,3341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flux Schedule — Flux Consulting Group</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --navy: #0f1f35;
+            --navy-mid: #1a3050;
+            --accent: #4f8ef7;
+            --accent-soft: #e8f0fe;
+            --success: #22c55e;
+            --success-soft: #dcfce7;
+            --warning: #f59e0b;
+            --warning-soft: #fef3c7;
+            --danger: #ef4444;
+            --danger-soft: #fee2e2;
+            --text: #0f1f35;
+            --text-muted: #6b7a99;
+            --border: #e2e8f0;
+            --surface: #f8fafc;
+            --white: #ffffff;
+            --radius: 14px;
+            --radius-sm: 8px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.10);
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--surface);
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* LOGIN */
+        #login-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--navy);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 40px;
+            width: 400px;
+            max-width: 90vw;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .login-logo {
+            width: 48px;
+            height: 48px;
+            background: var(--accent);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'DM Mono', monospace;
+            font-size: 20px;
+            font-weight: 500;
+            color: white;
+            margin: 0 auto 20px;
+        }
+
+        .login-title {
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+
+        .login-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .login-field {
+            margin-bottom: 16px;
+        }
+
+        .login-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-family: 'DM Sans', sans-serif;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .login-input:focus {
+            border-color: var(--accent);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 11px;
+            background: var(--navy);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            margin-top: 4px;
+            transition: background 0.15s;
+        }
+
+        .login-btn:hover {
+            background: var(--navy-mid);
+        }
+
+        .login-btn-google {
+            width: 100%;
+            padding: 11px;
+            background: white;
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .login-btn-google:hover {
+            background: var(--surface);
+            border-color: var(--accent);
+        }
+
+        .login-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .login-divider hr {
+            flex: 1;
+            border: none;
+            border-top: 1px solid var(--border);
+        }
+
+        .login-divider span {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .login-error {
+            font-size: 13px;
+            color: var(--danger);
+            text-align: center;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .login-step {
+            display: none;
+        }
+
+        .login-step.active {
+            display: block;
+        }
+
+        /* OAUTH CONNECTING SCREEN */
+        #oauth-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--navy);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .oauth-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .oauth-text {
+            color: white;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .oauth-sub {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #app {
+            display: none;
+        }
+
+        nav {
+            background: var(--navy);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-logo {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'DM Mono', monospace;
+            font-size: 14px;
+            font-weight: 500;
+            color: white;
+        }
+
+        .nav-title {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-user {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-user-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+        }
+
+        .nav-logout {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.15s;
+        }
+
+        .nav-logout:hover {
+            color: white;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            min-height: calc(100vh - 60px);
+        }
+
+        .sidebar {
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sidebar-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 8px 12px 4px;
+            margin-top: 8px;
+        }
+
+        .sidebar-label:first-child {
+            margin-top: 0;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: all 0.15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .sidebar-item:hover {
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        .sidebar-item.active {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .sidebar-icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.7;
+            flex-shrink: 0;
+        }
+
+        .sidebar-item.active .sidebar-icon {
+            opacity: 1;
+        }
+
+        .sidebar-badge {
+            margin-left: auto;
+            background: var(--accent);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 1px 7px;
+            border-radius: 20px;
+            font-family: 'DM Mono', monospace;
+        }
+
+        .main {
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .page-header {
+            margin-bottom: 28px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .page-desc {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: -1px;
+            margin-top: 4px;
+            font-family: 'DM Mono', monospace;
+        }
+
+        @keyframes pulseSkeleton {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.3; }
+        }
+
+        .pulse-loading {
+            animation: pulseSkeleton 1.5s ease-in-out infinite;
+            color: var(--text-muted);
+        }
+
+        .stat-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .stat-hint {
+            font-size: 11px;
+            color: var(--accent);
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .card-body {
+            padding: 0;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .step-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--border);
+            transition: background 0.2s;
+        }
+
+        .step-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .step-card:hover::before {
+            background: var(--accent);
+        }
+
+        .step-card.done::before {
+            background: var(--success);
+        }
+
+        .step-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+        }
+
+        .step-card.done .step-num {
+            background: var(--success-soft);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .step-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .step-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--navy);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--navy-mid);
+        }
+
+        .btn-ghost {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-ghost:hover {
+            background: var(--border);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            opacity: 0.9;
+        }
+
+        .btn-sm {
+            padding: 5px 12px;
+            font-size: 12px;
+        }
+
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead tr {
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            padding: 10px 20px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            background: var(--surface);
+        }
+
+        td {
+            padding: 13px 20px;
+            font-size: 14px;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: var(--surface);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-blue {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .badge-green {
+            background: var(--success-soft);
+            color: #16a34a;
+        }
+
+        .badge-purple {
+            background: #f3e8ff;
+            color: #9333ea;
+        }
+
+        .badge-yellow {
+            background: var(--warning-soft);
+            color: #d97706;
+        }
+
+        .badge-gray {
+            background: var(--surface);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .input {
+            width: 100%;
+            padding: 9px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text);
+            background: var(--white);
+            transition: border-color 0.15s;
+            outline: none;
+        }
+
+        .input:focus {
+            border-color: var(--accent);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .form-field {
+            margin-bottom: 16px;
+        }
+
+        .event-row {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            gap: 16px;
+            transition: background 0.1s;
+        }
+
+        .event-row:last-child {
+            border-bottom: none;
+        }
+
+        .event-row:hover {
+            background: var(--surface);
+        }
+
+        .event-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .event-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .event-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .event-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 31, 53, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal {
+            background: var(--white);
+            border-radius: var(--radius);
+            width: 580px;
+            max-width: 95vw;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(16px);
+            transition: transform 0.2s;
+        }
+
+        .modal-overlay.open .modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .modal-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .modal-close {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: none;
+            background: var(--surface);
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: var(--border);
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            flex-shrink: 0;
+        }
+
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 300;
+        }
+
+        .toast {
+            background: var(--navy);
+            color: white;
+            padding: 12px 18px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.2s ease;
+        }
+
+        .toast.success {
+            background: #166534;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .empty {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            opacity: 0.4;
+        }
+
+        .empty-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .empty-desc {
+            font-size: 13px;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent-soft);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .search-wrap {
+            position: relative;
+        }
+
+        .search-wrap svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .search-wrap .input {
+            padding-left: 36px;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .roster-available {
+            background: var(--success-soft);
+            color: #16a34a;
+            border: none;
+        }
+
+        .roster-assigned {
+            background: var(--warning-soft);
+            color: #d97706;
+            border: none;
+        }
+
+        .list-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .list-row:last-child {
+            border-bottom: none;
+        }
+
+        .list-info {
+            flex: 1;
+        }
+
+        .list-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .list-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .shift-event-block {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .shift-event-header {
+            padding: 12px 16px;
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .shift-event-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .shift-event-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .shift-event-body {
+            padding: 12px 16px;
+        }
+
+        .shift-times-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .shift-times-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            min-height: 28px;
+        }
+
+        .shift-time-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--accent-soft);
+            border: 1px solid var(--accent);
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--accent);
+        }
+
+        .shift-time-remove {
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--accent);
+            opacity: 0.7;
+            line-height: 1;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .shift-time-add {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .shift-time-add input {
+            width: 120px;
+            padding: 5px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+            outline: none;
+        }
+
+        .shift-time-add button {
+            padding: 5px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--white);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text);
+        }
+
+        .shift-block {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .shift-block-header {
+            background: var(--navy);
+            color: white;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .shift-block-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .shift-block-count {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .shift-staff-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .shift-staff-row:last-child {
+            border-bottom: none;
+        }
+
+        .shift-staff-name {
+            font-size: 13px;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .event-view-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+        }
+
+        .event-view-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .event-view-value {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            margin-top: 2px;
+        }
+
+        .no-shifts-msg {
+            text-align: center;
+            padding: 32px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .mini-schedule {
+            display: flex;
+            gap: 4px;
+        }
+
+        .mini-day {
+            display: flex;
+            flex-direction: column;
+            width: 44px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .mini-day-header {
+            font-size: 10px;
+            font-weight: 700;
+            background: var(--border);
+            color: var(--text-muted);
+            padding: 2px 0;
+            text-transform: uppercase;
+        }
+
+        .mini-day-body {
+            font-size: 10px;
+            color: var(--text);
+            padding: 3px 2px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.1;
+        }
+
+        .mini-day.avail .mini-day-header {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .mini-day.avail .mini-day-body {
+            color: #16a34a;
+        }
+
+        /* Gmail connected banner */
+        .gmail-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: var(--success-soft);
+            color: #16a34a;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .gmail-badge-warn {
+            background: var(--warning-soft);
+            color: #d97706;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- LOGIN -->
+    <div id="login-screen">
+        <div class="login-box">
+            <div class="login-logo">F</div>
+            <div class="login-title">Flux Schedule</div>
+            <div class="login-subtitle">Sign in — Flux Consulting Group</div>
+
+            <!-- Step 1: username/password -->
+            <div class="login-step active" id="login-step-1">
+                <div class="login-field">
+                    <label class="login-label">Username</label>
+                    <input type="text" class="login-input" id="login-user" placeholder="Enter username"
+                        onkeydown="if(event.key==='Enter') doLogin()">
+                </div>
+                <div class="login-field">
+                    <label class="login-label">Password</label>
+                    <input type="password" class="login-input" id="login-pass" placeholder="Enter password"
+                        onkeydown="if(event.key==='Enter') doLogin()">
+                </div>
+                <button class="login-btn" onclick="doLogin()">Continue</button>
+                <div class="login-error" id="login-error">Incorrect username or password</div>
+            </div>
+
+            <!-- Step 2: connect Gmail -->
+            <div class="login-step" id="login-step-2">
+                <div style="text-align:center;margin-bottom:20px;">
+                    <div style="font-size:32px;margin-bottom:8px;">📧</div>
+                    <div style="font-size:15px;font-weight:600;margin-bottom:6px;">Connect your Gmail</div>
+                    <div style="font-size:13px;color:var(--text-muted);">So email drafts go directly to your Gmail inbox
+                        — ready to review and send.</div>
+                </div>
+                <button class="login-btn-google" onclick="connectGmail()">
+                    <svg width="18" height="18" viewBox="0 0 24 24">
+                        <path fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                        <path fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                    </svg>
+                    Connect with Google
+                </button>
+                <div style="margin-top:12px;text-align:center;">
+                    <button onclick="skipGmail()"
+                        style="background:none;border:none;font-size:13px;color:var(--text-muted);cursor:pointer;text-decoration:underline;">Skip
+                        for now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OAUTH CONNECTING -->
+    <div id="oauth-screen"
+        style="display:none;position:fixed;inset:0;background:var(--navy);align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:16px;">
+        <div class="oauth-spinner"></div>
+        <div class="oauth-text">Connecting your Gmail...</div>
+        <div class="oauth-sub">You can close the popup window after signing in</div>
+    </div>
+
+    <!-- APP -->
+    <div id="app">
+        <nav>
+            <div class="nav-brand">
+                <div class="nav-logo">F</div>
+                <div>
+                    <div class="nav-title">Flux Schedule</div>
+                </div>
+            </div>
+            <div class="nav-right">
+                <span class="nav-user">
+                    <span class="nav-user-dot"></span>
+                    <span id="nav-username"></span>
+                </span>
+                <span id="nav-gmail-status"></span>
+                <button class="nav-logout" onclick="doLogout()">Sign out</button>
+            </div>
+        </nav>
+
+        <div class="layout">
+            <aside class="sidebar">
+                <div class="sidebar-label">Main</div>
+                <button class="sidebar-item active" onclick="showPage('dashboard', this)">
+                    <svg class="sidebar-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path
+                            d="M2 4a2 2 0 012-2h3a2 2 0 012 2v3a2 2 0 01-2 2H4a2 2 0 01-2-2V4zm9 0a2 2 0 012-2h3a2 2 0 012 2v3a2 2 0 01-2 2h-3a2 2 0 01-2-2V4zM2 13a2 2 0 012-2h3a2 2 0 012 2v3a2 2 0 01-2 2H4a2 2 0 01-2-2v-3zm9 0a2 2 0 012-2h3a2 2 0 012 2v3a2 2 0 01-2 2h-3a2 2 0 01-2-2v-3z" />
+                    </svg>
+                    Dashboard
+                </button>
+                <div class="sidebar-label">Schedule</div>
+                <button class="sidebar-item" onclick="showPage('events', this)">
+                    <svg class="sidebar-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path
+                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zM4 8h12v8H4V8z" />
+                    </svg>
+                    Events <span class="sidebar-badge" id="badge-events">—</span>
+                </button>
+                <button class="sidebar-item" onclick="showPage('roster', this)">
+                    <svg class="sidebar-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                        <path fill-rule="evenodd"
+                            d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    Daily Roster
+                </button>
+                <div class="sidebar-label">People</div>
+                <button class="sidebar-item" onclick="showPage('staff', this)">
+                    <svg class="sidebar-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path
+                            d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                    </svg>
+                    Staff <span class="sidebar-badge" id="badge-staff">—</span>
+                </button>
+                <div class="sidebar-label">Communication</div>
+                <button class="sidebar-item" onclick="showPage('emails', this)">
+                    <svg class="sidebar-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                    </svg>
+                    Emails
+                </button>
+            </aside>
+
+            <main class="main">
+
+                <!-- DASHBOARD -->
+                <div class="page active" id="page-dashboard">
+                    <div class="page-header">
+                        <div class="page-title" id="dashboard-greeting">Good morning 👋</div>
+                        <div class="page-desc">Here's what's happening this month at Flux Consulting Group</div>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat-card" onclick="openAllEventsModal()">
+                            <div class="stat-label">Events this month</div>
+                            <div class="stat-value pulse-loading" id="stat-events">—</div>
+                            <div class="stat-sub" id="stat-events-sub">Loading...</div>
+                            <div class="stat-hint">Click to view list →</div>
+                        </div>
+                        <div class="stat-card" onclick="openModal('modal-stat-staff')">
+                            <div class="stat-label">Active staff</div>
+                            <div class="stat-value pulse-loading" id="stat-staff">—</div>
+                            <div class="stat-sub">In Availability</div>
+                            <div class="stat-hint">Click to view list →</div>
+                        </div>
+                        <div class="stat-card" onclick="openShiftsModal()">
+                            <div class="stat-label">Events with shifts</div>
+                            <div class="stat-value pulse-loading" id="stat-shifts">—</div>
+                            <div class="stat-sub">This month</div>
+                            <div class="stat-hint">Click to view list →</div>
+                        </div>
+                        <div class="stat-card" onclick="openDraftsModal()">
+                            <div class="stat-label">Pending drafts</div>
+                            <div class="stat-value pulse-loading" id="stat-drafts">—</div>
+                            <div class="stat-sub">In Gmail</div>
+                            <div class="stat-hint">Click to view list →</div>
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Upcoming events</div>
+                                <button class="btn btn-ghost btn-sm"
+                                    onclick="showPage('events', document.querySelectorAll('.sidebar-item')[1])">View
+                                    all</button>
+                            </div>
+                            <div class="card-body" id="dashboard-events">
+                                <div class="empty">
+                                    <div class="empty-icon">📅</div>
+                                    <div class="empty-title">Loading events...</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Quick actions</div>
+                            </div>
+                            <div class="card-body" style="padding:16px;">
+                                <div style="display:flex;flex-direction:column;gap:10px;">
+                                    <button class="btn btn-primary btn-full" onclick="openModal('modal-sync')">
+                                        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        1. Sync Google Calendar
+                                    </button>
+                                    <button class="btn btn-ghost btn-full" onclick="openModal('modal-shifts-builder')">
+                                        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+                                            <path
+                                                d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z" />
+                                        </svg>
+                                        2. Generate Shifts
+                                    </button>
+                                    <button class="btn btn-ghost btn-full" onclick="openModal('modal-eventtab')">
+                                        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+                                            <path
+                                                d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                                        </svg>
+                                        3. Assign Staff
+                                    </button>
+                                    <button class="btn btn-success btn-full" onclick="openModal('modal-draft')">
+                                        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+                                            <path
+                                                d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                                        </svg>
+                                        4. Create Gmail Draft
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EVENTS -->
+                <div class="page" id="page-events">
+                    <div class="page-header">
+                        <div class="page-title">Events</div>
+                        <div class="page-desc">Manage your schedule across all three venues</div>
+                    </div>
+                    <div class="steps-grid">
+                        <div class="step-card done" onclick="openModal('modal-sync')">
+                            <div class="step-num">✓</div>
+                            <div class="step-title">Sync Calendar</div>
+                            <div class="step-desc">Pull events from Sofi Stadium, Intuit Dome and LA Dodgers</div>
+                            <button class="btn btn-ghost btn-sm">Re-sync</button>
+                        </div>
+                        <div class="step-card" onclick="openModal('modal-shifts-builder')">
+                            <div class="step-num">2</div>
+                            <div class="step-title">Generate Shifts</div>
+                            <div class="step-desc">Set shift times for each event</div><button
+                                class="btn btn-primary btn-sm">Set up shifts</button>
+                        </div>
+                        <div class="step-card" onclick="openModal('modal-eventtab')">
+                            <div class="step-num">3</div>
+                            <div class="step-title">Assign Staff</div>
+                            <div class="step-desc">Auto-assign available staff to each shift</div><button
+                                class="btn btn-primary btn-sm">Assign</button>
+                        </div>
+                        <div class="step-card" onclick="openModal('modal-draft')">
+                            <div class="step-num">4</div>
+                            <div class="step-title">Create Gmail Draft</div>
+                            <div class="step-desc">Draft goes to your Gmail — ready to review and send</div><button
+                                class="btn btn-success btn-sm">Create Draft</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title" id="events-month-title">Loading...</div>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <button class="btn btn-ghost btn-sm" onclick="changeMonth(-1)">← Previous</button>
+                                <span id="current-month-label"
+                                    style="font-size:14px;font-weight:600;color:var(--text);padding:0 8px;"></span>
+                                <button class="btn btn-ghost btn-sm" onclick="changeMonth(1)">Next →</button>
+                            </div>
+                        </div>
+                        <div class="card-body" id="page-events-list"></div>
+                    </div>
+                </div>
+
+                <!-- ROSTER -->
+                <div class="page" id="page-roster">
+                    <div class="page-header">
+                        <div class="page-title">Daily Roster</div>
+                        <div class="page-desc">See who is available for any given day</div>
+                    </div>
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-body" style="padding:20px;">
+                            <div class="input-group">
+                                <div style="flex:1;">
+                                    <div class="form-label">Select date</div><input type="date" class="input"
+                                        id="roster-date">
+                                </div>
+                                <div style="padding-top:22px;"><button class="btn btn-primary" id="btn-roster"
+                                        onclick="generateRoster()">Generate Roster</button></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="roster-results" style="display:none;">
+                        <div class="grid-2">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title" id="roster-available-title" style="color:#16a34a;">✓
+                                        Available</div>
+                                </div>
+                                <div class="card-body">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Position</th>
+                                                <th>Status</th>
+                                                <th>Assigned to</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="roster-available"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title" id="roster-unavailable-title" style="color:#ef4444;">✗ Not
+                                        Available</div>
+                                </div>
+                                <div class="card-body">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Position</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="roster-unavailable"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="roster-empty" class="card">
+                        <div class="empty">
+                            <div class="empty-icon">📋</div>
+                            <div class="empty-title">Select a date to view the roster</div>
+                            <div class="empty-desc">Pick a date above and click Generate Roster</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STAFF -->
+                <div class="page" id="page-staff">
+                    <div class="page-header">
+                        <div class="page-title">Staff</div>
+                        <div class="page-desc" id="staff-desc">Loading...</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="search-wrap" style="flex:1;max-width:300px;">
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="#6b7a99">
+                                    <path fill-rule="evenodd"
+                                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                <input type="text" class="input" placeholder="Search staff..."
+                                    oninput="filterStaff(this.value)">
+                            </div>
+                            <select class="input" style="width:auto;" onchange="filterByPosition(this.value)">
+                                <option value="">All positions</option>
+                                <option>Mobility Solution Lead</option>
+                                <option>Mobility Solution Specialist</option>
+                                <option>Mobility Solution Clerk</option>
+                                <option>Mobility Operations Manager</option>
+                                <option>Mobility Hub Manager</option>
+                                <option>Staff - TBD</option>
+                            </select>
+                        </div>
+                        <div class="card-body">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Position</th>
+                                        <th>Pref Venue / Time</th>
+                                        <th>Weekly Availability</th>
+                                        <th>Blackouts (Month)</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="staff-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EMAILS -->
+                <div class="page" id="page-emails">
+                    <div class="page-header">
+                        <div class="page-title">Emails</div>
+                        <div class="page-desc">Drafts go directly to your Gmail — review and send from there</div>
+                    </div>
+                    <div id="gmail-warning"
+                        style="background:var(--warning-soft);border:1px solid var(--warning);border-radius:var(--radius-sm);padding:14px 18px;margin-bottom:20px;font-size:13px;color:#92400e;display:none;">
+                        ⚠ Your Gmail is not connected. <button onclick="connectGmail()"
+                            style="background:none;border:none;cursor:pointer;font-weight:600;color:#92400e;text-decoration:underline;">Connect
+                            now</button> to send drafts to your Gmail.
+                    </div>
+                    <div class="grid-2" style="gap:20px;">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Monthly Events Email</div>
+                            </div>
+                            <div class="card-body" style="padding:20px;">
+                                <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Send all events
+                                    for a given month to all staff members.</p>
+                                <div class="form-field">
+                                    <div class="form-label">Month</div><input type="month" id="monthly-email-month"
+                                        class="input" value="2026-04">
+                                </div>
+                                <button id="btn-monthly-email" class="btn btn-primary btn-full"
+                                    onclick="generateMonthlyEmail()">Create Draft in My Gmail</button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Shift Assignment Email</div>
+                            </div>
+                            <div class="card-body" style="padding:20px;">
+                                <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Send shift
+                                    assignments to all assigned staff for a specific event.</p>
+                                <div class="form-field">
+                                    <div class="form-label">Event</div><select class="input" id="shift-email-event">
+                                        <option>— Select event —</option>
+                                    </select>
+                                </div>
+                                <button id="btn-shift-email" class="btn btn-primary btn-full"
+                                    onclick="generateShiftEmail()">Create Draft in My Gmail</button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Client Confirmation</div><span class="badge badge-blue">Intuit
+                                    Dome only</span>
+                            </div>
+                            <div class="card-body" style="padding:20px;">
+                                <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Send a formal
+                                    staff confirmation to the Intuit Dome client.</p>
+                                <div class="form-field">
+                                    <div class="form-label">Event</div><select class="input" id="client-email-event">
+                                        <option>— Select event —</option>
+                                    </select>
+                                </div>
+                                <button id="btn-client-email" class="btn btn-primary btn-full"
+                                    onclick="generateClientEmail()">Create Draft in My Gmail</button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Sync & Tools</div>
+                            </div>
+                            <div class="card-body" style="padding:20px;">
+                                <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Utility tools for
+                                    keeping your data up to date.</p>
+                                <div style="display:flex;flex-direction:column;gap:10px;">
+                                    <button class="btn btn-ghost btn-full" id="btn-sync-blackout"
+                                        onclick="runSyncBlackout()">Sync Blackout
+                                        Dates</button>
+                                    <button class="btn btn-ghost btn-full" id="btn-sync-archive"
+                                        onclick="runArchiveEvents()">Archive Past Events</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <div class="modal-overlay" id="modal-event-view">
+        <div class="modal" style="width:600px;">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title" id="event-view-title">Event</div>
+                    <div class="modal-subtitle" id="event-view-subtitle"></div>
+                </div><button class="modal-close" onclick="closeModal('modal-event-view')">×</button>
+            </div>
+            <div class="modal-body" id="event-view-body"></div>
+            <div class="modal-footer"><button class="btn btn-ghost"
+                    onclick="closeModal('modal-event-view')">Close</button><button class="btn btn-primary"
+                    id="btn-event-view-draft">Create Gmail Draft</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-edit-staff">
+        <div class="modal" style="width:500px;">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">Edit Staff Member</div>
+                    <div class="modal-subtitle" id="edit-staff-name"></div>
+                </div><button class="modal-close" onclick="closeModal('modal-edit-staff')">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-staff-fullname">
+                <div class="form-field">
+                    <div class="form-label">Phone</div><input type="text" class="input" id="edit-staff-phone">
+                </div>
+                <div class="form-field">
+                    <div class="form-label">Position</div><select class="input" id="edit-staff-position">
+                        <option>Mobility Solution Lead</option>
+                        <option>Mobility Operations Manager</option>
+                        <option>Mobility Hub Manager</option>
+                        <option>Mobility Solution Clerk</option>
+                        <option>Mobility Solution Specialist</option>
+                        <option>Staff - TBD</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <div class="form-label">Preferred Venue</div><input type="text" class="input" id="edit-staff-venue">
+                </div>
+                <div class="form-field">
+                    <div class="form-label">Work Time Preference</div><input type="text" class="input"
+                        id="edit-staff-timepref">
+                </div>
+                <div class="form-field">
+                    <div class="form-label">Blackout Days</div><input type="text" class="input"
+                        id="edit-staff-blackout">
+                </div>
+                <div class="form-label" style="margin-top:20px;">Weekly Availability</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;margin-top:8px;">
+                    <div><label>Mon</label><input type="text" class="input" id="edit-avail-mon"
+                            style="padding:6px 10px;"></div>
+                    <div><label>Tue</label><input type="text" class="input" id="edit-avail-tue"
+                            style="padding:6px 10px;"></div>
+                    <div><label>Wed</label><input type="text" class="input" id="edit-avail-wed"
+                            style="padding:6px 10px;"></div>
+                    <div><label>Thu</label><input type="text" class="input" id="edit-avail-thu"
+                            style="padding:6px 10px;"></div>
+                    <div><label>Fri</label><input type="text" class="input" id="edit-avail-fri"
+                            style="padding:6px 10px;"></div>
+                    <div><label>Sat</label><input type="text" class="input" id="edit-avail-sat"
+                            style="padding:6px 10px;"></div>
+                    <div><label>Sun</label><input type="text" class="input" id="edit-avail-sun"
+                            style="padding:6px 10px;"></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-ghost"
+                    onclick="closeModal('modal-edit-staff')">Cancel</button><button class="btn btn-primary"
+                    id="btn-save-staff" onclick="saveStaffEdit()">Save Changes</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-shifts-builder">
+        <div class="modal" style="width:620px;">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">2. Generate Shifts</div>
+                    <div class="modal-subtitle">Set the shift start times for each event</div>
+                </div><button class="modal-close" onclick="closeModal('modal-shifts-builder')">×</button>
+            </div>
+            <div class="modal-body" id="shifts-builder-body"></div>
+            <div class="modal-footer"><button class="btn btn-ghost"
+                    onclick="closeModal('modal-shifts-builder')">Cancel</button><button class="btn btn-primary"
+                    onclick="runGenerateShifts()">Generate Shifts</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-sync">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Sync Google Calendar</div><button class="modal-close"
+                    onclick="closeModal('modal-sync')">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:14px;color:var(--text-muted);margin-bottom:20px;">Pull all events from Sofi Stadium,
+                    Intuit Dome and LA Dodgers calendars.</p>
+                <div class="form-field">
+                    <div class="form-label">Month & Year</div><input type="month" class="input" id="sync-month">
+                </div>
+                <div
+                    style="background:var(--surface);border-radius:var(--radius-sm);padding:14px;font-size:13px;color:var(--text-muted);">
+                    Calendars: <strong>Sofi Stadium</strong>, <strong>Intuit Dome</strong>, <strong>LA Dodgers</strong>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-ghost"
+                    onclick="closeModal('modal-sync')">Cancel</button><button class="btn btn-primary"
+                    onclick="runSync()">Sync Calendar</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-eventtab">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">3. Assign Staff</div><button class="modal-close"
+                    onclick="closeModal('modal-eventtab')">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:14px;color:var(--text-muted);margin-bottom:20px;">Select an event to automatically
+                    assign available staff to each shift.</p>
+                <div class="form-field">
+                    <div class="form-label">Select event</div><select class="input" id="assign-event-select"
+                        onchange="buildRequirementsForm()">
+                        <option>— Select event —</option>
+                    </select>
+                </div>
+                <div id="assign-shift-requirements" style="margin-top:16px;"></div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-ghost"
+                    onclick="closeModal('modal-eventtab')">Cancel</button><button class="btn btn-primary"
+                    onclick="runAssignStaff()">Assign Staff</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-draft">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Create Gmail Draft</div><button class="modal-close"
+                    onclick="closeModal('modal-draft')">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:14px;color:var(--text-muted);margin-bottom:20px;">The draft will appear in <strong
+                        id="draft-target-email">your Gmail</strong> — ready to review and send.</p>
+                <div class="form-field">
+                    <div class="form-label">Select event</div><select class="input" id="draft-event-select">
+                        <option>— Select event —</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-ghost"
+                    onclick="closeModal('modal-draft')">Cancel</button><button class="btn btn-success"
+                    onclick="runGmailDraft()">Create Draft in My Gmail</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-stat-events">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="stat-events-modal-title">Events this month</div><button class="modal-close"
+                    onclick="closeModal('modal-stat-events')">×</button>
+            </div>
+            <div class="modal-body" id="stat-events-modal-body"></div>
+            <div class="modal-footer"><button class="btn btn-ghost"
+                    onclick="closeModal('modal-stat-events')">Close</button><button class="btn btn-primary"
+                    onclick="showPage('events', document.querySelectorAll('.sidebar-item')[1]); closeModal('modal-stat-events')">Go
+                    to Events</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-stat-staff">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="stat-staff-modal-title">Active Staff</div><button class="modal-close"
+                    onclick="closeModal('modal-stat-staff')">×</button>
+            </div>
+            <div class="modal-body" id="stat-staff-modal-body"></div>
+            <div class="modal-footer"><button class="btn btn-ghost"
+                    onclick="closeModal('modal-stat-staff')">Close</button><button class="btn btn-primary"
+                    onclick="showPage('staff', document.querySelectorAll('.sidebar-item')[3]); closeModal('modal-stat-staff')">View
+                    All Staff</button></div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toasts"></div>
+
+    <script>
+        // ── POPUP CALLBACK — runs immediately before anything renders ──
+        // If this page loaded inside a popup with ?code=, send to parent and close
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            if (code && window.opener) {
+                document.write('<div style="font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;background:#0f1f35;color:white;flex-direction:column;gap:16px;"><div style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.2);border-top-color:white;border-radius:50%;animation:spin 0.8s linear infinite;"></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style><p style="font-size:15px;font-weight:500;">Connecting your Gmail...</p></div>');
+                window.opener.postMessage({ type: 'oauth_code', code: code }, '*');
+                setTimeout(() => window.close(), 1500);
+                throw new Error('popup_handled'); // Stop rest of script from running
+            }
+        })();
+    </script>
+
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzh4Ofz4E_WuQKbE0VeWCYYOi21tiHNFIauVaiArFS7jOUaUnN4VqWpTKT_YXhilz_r/exec';
+        const LAMBDA_URL = 'https://s4fp3l63xk.execute-api.us-east-1.amazonaws.com';
+
+        // ── AUTH ─────────────────────────────────────────────────
+        const USERS = { 'admin': 'flux2026', 'manager': 'flux2026', 'emma': 'flux2026' };
+        let currentUser = '';
+        let gmailTokens = null;
+
+        function doLogin() {
+            const user = document.getElementById('login-user').value.trim().toLowerCase();
+            const pass = document.getElementById('login-pass').value;
+            const err = document.getElementById('login-error');
+            if (USERS[user] && USERS[user] === pass) {
+                currentUser = user;
+                err.style.display = 'none';
+                // Check if already have tokens saved in sessionStorage
+                const saved = sessionStorage.getItem('gmail_tokens_' + user);
+                if (saved) {
+                    gmailTokens = JSON.parse(saved);
+                    launchApp();
+                } else {
+                    // Show step 2: connect Gmail
+                    document.getElementById('login-step-1').classList.remove('active');
+                    document.getElementById('login-step-2').classList.add('active');
+                }
+            } else {
+                err.style.display = 'block';
+                document.getElementById('login-pass').value = '';
+            }
+        }
+
+        async function connectGmail() {
+            try {
+                const res = await fetch(LAMBDA_URL + '/auth-url');
+                const json = await res.json();
+                // Save user before redirect — page will reload on return
+                localStorage.setItem('pending_oauth_user', currentUser);
+                // Redirect in same window — most reliable approach
+                window.location.href = json.url;
+            } catch (e) {
+                console.error('OAuth error:', e);
+                alert('Could not connect to Gmail. Try again.');
+            }
+        }
+
+        async function exchangeCode(code) {
+            document.getElementById('oauth-screen').style.display = 'flex';
+            try {
+                const res = await fetch(LAMBDA_URL + '/exchange-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+                const json = await res.json();
+                if (json.tokens) {
+                    gmailTokens = {
+                        access_token: json.tokens.access_token,
+                        refresh_token: json.tokens.refresh_token,
+                        expiry: Date.now() + (json.tokens.expires_in * 1000)
+                    };
+                    sessionStorage.setItem('gmail_tokens_' + currentUser, JSON.stringify(gmailTokens));
+                    launchApp();
+                } else {
+                    throw new Error('No tokens received');
+                }
+            } catch (e) {
+                console.error('Exchange error:', e);
+                alert('Gmail connection failed. Please try again.');
+                document.getElementById('oauth-screen').style.display = 'none';
+                document.getElementById('login-screen').style.display = 'flex';
+            }
+        }
+
+        function skipGmail() {
+            gmailTokens = null;
+            launchApp();
+        }
+
+        function launchApp() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('oauth-screen').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+            document.getElementById('nav-username').textContent = currentUser.charAt(0).toUpperCase() + currentUser.slice(1);
+            // Show Gmail status in nav
+            const statusEl = document.getElementById('nav-gmail-status');
+            if (gmailTokens) {
+                statusEl.innerHTML = '<span class="gmail-badge">✓ Gmail connected</span>';
+                document.getElementById('gmail-warning') && (document.getElementById('gmail-warning').style.display = 'none');
+            } else {
+                statusEl.innerHTML = '<span class="gmail-badge gmail-badge-warn">⚠ Gmail not connected</span>';
+                const warn = document.getElementById('gmail-warning');
+                if (warn) warn.style.display = 'block';
+            }
+            setGreeting();
+            initApp();
+        }
+
+        function doLogout() {
+            gmailTokens = null;
+            currentUser = '';
+            document.getElementById('app').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('login-step-1').classList.add('active');
+            document.getElementById('login-step-2').classList.remove('active');
+            document.getElementById('login-user').value = '';
+            document.getElementById('login-pass').value = '';
+        }
+
+        async function getAccessToken() {
+            if (!gmailTokens) return null;
+            // Refresh if expired (5 min buffer)
+            if (Date.now() > gmailTokens.expiry - 300000) {
+                try {
+                    const res = await fetch(LAMBDA_URL + '/refresh-token', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ refresh_token: gmailTokens.refresh_token })
+                    });
+                    const json = await res.json();
+                    if (json.access_token) {
+                        gmailTokens.access_token = json.access_token;
+                        gmailTokens.expiry = Date.now() + (json.expires_in * 1000);
+                        sessionStorage.setItem('gmail_tokens_' + currentUser, JSON.stringify(gmailTokens));
+                    }
+                } catch (e) { console.error('Token refresh error:', e); }
+            }
+            return gmailTokens.access_token;
+        }
+
+        // ── GMAIL DRAFT ──────────────────────────────────────────
+        async function createGmailDraftViaLambda(subject, htmlBody, bcc) {
+            const access_token = await getAccessToken();
+            if (!access_token) {
+                showToast('Gmail not connected. Connect your Gmail first.', '');
+                return false;
+            }
+            const res = await fetch(LAMBDA_URL + '/create-draft', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ access_token, subject, htmlBody, bcc })
+            });
+            const json = await res.json();
+            if (json.success) return true;
+            throw new Error(json.error || 'Draft creation failed');
+        }
+
+        async function runGmailDraft(directEventIndex) {
+            let idx = -1;
+            if (typeof directEventIndex !== 'undefined') {
+                idx = directEventIndex;
+            } else {
+                const selectElement = document.getElementById('draft-event-select');
+                if (!selectElement || selectElement.value === "" || selectElement.value === "— Select event —") {
+                    showToast('Please select an event first.', 'warning');
+                    return;
+                }
+                idx = selectElement.value;
+            }
+
+            if (!gmailTokens) {
+                if (typeof directEventIndex === 'undefined') closeModal('modal-draft');
+                showToast('Connect your Gmail first to create drafts.', '');
+                showPage('emails', document.querySelectorAll('.sidebar-item')[4]);
+                return;
+            }
+
+            const evt = EVENTS_DATA[idx];
+            if (!evt) return;
+
+            // Generate tabName exactly as google backend does, avoiding browser timezone shifts
+            let formattedDate = "";
+            if (typeof evt.date === 'string' && evt.date.includes('T')) {
+                const [year, month, day] = evt.date.split('T')[0].split('-');
+                formattedDate = Number(month) + '-' + Number(day) + '-' + year;
+            } else {
+                const d = new Date(evt.date);
+                formattedDate = (d.getMonth() + 1) + '-' + d.getDate() + '-' + d.getFullYear();
+            }
+            const targetTabName = evt.name + ' - ' + formattedDate;
+
+            if (typeof directEventIndex === 'undefined') closeModal('modal-draft');
+            showToast('Creating draft in your Gmail...', '');
+            try {
+                // Use Apps Script to get the email content
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'shiftEmail',
+                        tabName: targetTabName,
+                        eventName: evt.name,
+                        eventDate: formattedDate,
+                        location: evt.location
+                    })
+                });
+                const json = await res.json();
+                if (json.status !== 'ok') throw new Error(json.message);
+                if (!json.drafts || json.drafts.length === 0) throw new Error("No draft content was returned. Are staff assigned and confirmed?");
+
+                // Create drafts via Lambda OAuth
+                for (const draft of json.drafts) {
+                    await createGmailDraftViaLambda(draft.subject, draft.htmlBody, draft.bcc);
+                }
+
+                showToast('✓ Draft created in your Gmail inbox!', 'success');
+                evt.status = 'Email Sent';
+                if (typeof renderEventsFromSheet === 'function') renderEventsFromSheet(EVENTS_DATA);
+            } catch (e) {
+                showToast('Error creating draft: ' + e.message, '');
+            }
+        }
+
+        // ── INIT ─────────────────────────────────────────────────
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        let STAFF_DATA = [];
+        let EVENTS_DATA = [];
+        let EVENTS_BUILDER = [];
+        let EVENTS_CACHE = {}; 
+        let AVAILABLE_STAFF = [];
+        let currentEventIndex = -1;
+
+        function setGreeting() {
+            const h = new Date().getHours();
+            const g = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+            document.getElementById('dashboard-greeting').textContent = g + ' 👋';
+        }
+
+        function initApp() {
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, '0');
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            document.getElementById('roster-date').value = today.getFullYear() + '-' + mm + '-' + dd;
+            document.getElementById('sync-month').value = today.getFullYear() + '-' + mm;
+            document.getElementById('monthly-email-month').value = today.getFullYear() + '-' + mm;
+            // Update draft modal email target
+            const emailTarget = document.getElementById('draft-target-email');
+            if (emailTarget) emailTarget.textContent = gmailTokens ? 'your Gmail' : 'your Gmail (not connected)';
+            updateMonthLabel();
+            showLoading('staff-table', 5);
+            showLoading('page-events-list', 4);
+            fetchStaff();
+            fetchEvents();
+        }
+
+        function updateMonthLabel() {
+            const label = MONTH_NAMES[currentMonth] + ' ' + currentYear;
+            ['current-month-label', 'events-month-title', 'stat-events-sub'].forEach(id => {
+                const el = document.getElementById(id); if (el) el.textContent = label;
+            });
+        }
+
+        // ── FETCH ─────────────────────────────────────────────────
+        async function fetchStaff() {
+            try {
+                const res = await fetch(API_URL + '?action=getStaff');
+                const json = await res.json();
+                if (json.status === 'ok') {
+                    STAFF_DATA = json.data;
+                    AVAILABLE_STAFF = json.data.map(s => ({ name: s.fullName, pos: s.position || 'Staff - TBD' }));
+                    renderStaffTable(json.data);
+                    const elStaff = document.getElementById('stat-staff');
+                    if (elStaff) { elStaff.textContent = json.data.length; elStaff.classList.remove('pulse-loading'); }
+                    document.getElementById('badge-staff').textContent = json.data.length;
+                    document.getElementById('staff-desc').textContent = json.data.length + ' employees across all venues';
+                    document.getElementById('stat-staff-modal-title').textContent = 'Active Staff — ' + json.data.length + ' employees';
+                    renderStaffModal(json.data);
+                }
+            } catch (e) { console.error('Staff fetch error:', e); }
+        }
+
+        async function fetchEvents() {
+            try {
+                const res = await fetch(API_URL + '?action=getEvents&month=' + (currentMonth + 1) + '&year=' + currentYear);
+                const json = await res.json();
+                if (json.status === 'ok') {
+                    EVENTS_DATA = json.data;
+                    EVENTS_CACHE[currentMonth + '-' + currentYear] = EVENTS_DATA; // Init caching
+                    renderEventsFromSheet(json.data);
+                    const elEvts = document.getElementById('stat-events');
+                    if (elEvts) { elEvts.textContent = json.data.length; elEvts.classList.remove('pulse-loading'); }
+                    const badgeEvents = document.getElementById('badge-events');
+                    if (badgeEvents) badgeEvents.textContent = json.data.length;
+                    document.getElementById('stat-events-modal-title').textContent = 'Events — ' + MONTH_NAMES[currentMonth] + ' ' + currentYear;
+                    renderEventsModal(json.data);
+                    populateEventSelects(json.data);
+                }
+            } catch (e) { console.error('Events fetch error:', e); }
+        }
+
+        async function fetchEventsByMonth(month, year) {
+            const cacheKey = month + '-' + year;
+            if (EVENTS_CACHE[cacheKey]) {
+                EVENTS_DATA = EVENTS_CACHE[cacheKey];
+                renderEventsFromSheet(EVENTS_DATA);
+                populateEventSelects(EVENTS_DATA);
+                return;
+            }
+            showLoading('page-events-list', 4);
+            try {
+                const res = await fetch(API_URL + '?action=getEvents&month=' + (month + 1) + '&year=' + year);
+                const json = await res.json();
+                if (json.status === 'ok') {
+                    EVENTS_DATA = json.data;
+                    EVENTS_CACHE[cacheKey] = EVENTS_DATA; // Save RAM session
+                    renderEventsFromSheet(json.data);
+                    const elEvts = document.getElementById('stat-events');
+                    if (elEvts) { elEvts.textContent = json.data.length; elEvts.classList.remove('pulse-loading'); }
+                    const badgeEvts = document.getElementById('badge-events');
+                    if (badgeEvts) badgeEvts.textContent = json.data.length;
+                    populateEventSelects(json.data);
+                }
+            } catch (e) { console.error('Events fetch error:', e); }
+        }
+
+        // ── RENDER ────────────────────────────────────────────────
+        function renderStaffTable(staff) {
+            const tbody = document.getElementById('staff-table');
+            if (!staff || !staff.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">No staff found</td></tr>'; return; }
+            const positionBadge = pos => {
+                if (!pos || pos === 'Staff - TBD') return '<span class="badge badge-gray">Staff TBD</span>';
+                if (pos.includes('Lead')) return '<span class="badge badge-green">Lead</span>';
+                if (pos.includes('Specialist')) return '<span class="badge badge-blue">Specialist</span>';
+                if (pos.includes('Clerk')) return '<span class="badge" style="background:#f3e8ff;color:#7c3aed;">Clerk</span>';
+                if (pos.includes('Operations Manager')) return '<span class="badge" style="background:#fce7f3;color:#be185d;">Ops Manager</span>';
+                if (pos.includes('Hub Manager')) return '<span class="badge" style="background:#ecfdf5;color:#065f46;">Hub Manager</span>';
+                return '<span class="badge badge-gray">Staff TBD</span>';
+            };
+            const shortDisplay = val => {
+                if (!val) return '-';
+                const s = val.toString().trim(), l = s.toLowerCase();
+                if (l.includes('unavailable') || l === '') return '-';
+                if (l.includes('open') || l.includes('full') || l.includes('any') || l.includes('available')) return 'Open';
+                const afterM = l.match(/after\s+([a-z0-9:]+)/);
+                if (afterM) return '>' + afterM[1];
+                return s.length > 8 ? s.substring(0, 8) + '..' : s;
+            };
+            const isAvail = val => val && !val.toString().toLowerCase().includes('unavailable') && val.toString().trim() !== '';
+            const miniDay = (label, val) => `<div class="mini-day ${isAvail(val) ? 'avail' : ''}"><div class="mini-day-header">${label}</div><div class="mini-day-body" title="${val || 'Unavailable'}">${shortDisplay(val)}</div></div>`;
+            tbody.innerHTML = staff.map(s => {
+                const initials = s.fullName.split(' ').map(w => w[0]).join('').slice(0, 2);
+                const safeName = s.fullName.replace(/'/g, "\\'");
+                const blackoutsDisplay = (s.blackoutDays && s.blackoutDays.trim() !== '') ? s.blackoutDays : 'None';
+                return `<tr data-search="${(s.fullName + ' ' + (s.phone || '')).toLowerCase()}" data-pos="${s.position || 'Staff - TBD'}">
+        <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar">${initials}</div>${s.fullName}</div></td>
+        <td>${positionBadge(s.position)}</td>
+        <td><div style="font-size:12px;"><b>V:</b> ${s.preferredVenue || 'Any'}<br><b>T:</b> ${s.workTimePreference || 'Any'}</div></td>
+        <td><div class="mini-schedule">${miniDay('Mon', s.availMon)}${miniDay('Tue', s.availTue)}${miniDay('Wed', s.availWed)}${miniDay('Thu', s.availThu)}${miniDay('Fri', s.availFri)}${miniDay('Sat', s.availSat)}${miniDay('Sun', s.availSun)}</div></td>
+        <td><div style="font-size:13px; font-weight:600; color: ${blackoutsDisplay === 'None' ? '#94a3b8' : '#b91c1c'}; background: ${blackoutsDisplay === 'None' ? 'transparent' : '#fef2f2'}; padding:4px 8px; border-radius:6px; display:inline-block; border:1px solid ${blackoutsDisplay === 'None' ? 'transparent' : '#fee2e2'};">${blackoutsDisplay}</div></td>
+        <td><button class="btn btn-ghost btn-sm" onclick="openEditStaffModal('${safeName}')">✏️ Edit</button></td>
+      </tr>`;
+            }).join('');
+        }
+
+        function renderStaffModal(staff) {
+            const body = document.getElementById('stat-staff-modal-body');
+            if (!staff || !staff.length) return;
+            body.innerHTML = `<table><thead><tr><th>Name</th><th>Position</th><th>Venue</th></tr></thead><tbody>
+      ${staff.slice(0, 10).map(s => `<tr><td>${s.fullName}</td><td>${s.position || '—'}</td><td>${s.preferredVenue || '—'}</td></tr>`).join('')}
+      ${staff.length > 10 ? `<tr><td colspan="3" style="text-align:center;color:var(--text-muted);font-size:13px;font-style:italic;">+ ${staff.length - 10} more</td></tr>` : ''}
+    </tbody></table>`;
+        }
+
+        function getStatusBadge(evt) {
+            if (!evt) return '';
+            const s = evt.status;
+            const m = {
+                'Pending': '<span class="badge badge-yellow">Pending</span>',
+                'Shifts Built': '<span class="badge badge-blue">Shifts Built</span>',
+                'Staff Assigned': '<span class="badge badge-green">Staff Assigned</span>',
+                'Email Sent': '<span class="badge badge-purple">Email Sent</span>',
+                'Generated': '<span class="badge badge-green">Staff Assigned</span>'
+            };
+            let badge = m[s] || `<span class="badge badge-gray">${s || 'Not synced'}</span>`;
+
+            if (['Staff Assigned', 'Email Sent', 'Generated'].includes(s) && evt.assignedList) {
+                const hasMissing = evt.assignedList.some(shift => shift.missing && shift.missing.length > 0);
+                if (hasMissing) {
+                    badge += ` <span class="badge badge-red" style="margin-left:6px; background:#fef2f2; color:#991b1b; border:1px solid #fee2e2;">Missing Staff</span>`;
+                }
+            }
+            return badge;
+        }
+
+        function renderEventsFromSheet(events) {
+            const colors = ['#4f8ef7', '#22c55e', '#f59e0b', '#a855f7', '#ef4444', '#06b6d4'];
+            const eventsCard = document.getElementById('page-events-list');
+            const dashCard = document.getElementById('dashboard-events');
+            const statShifts = document.getElementById('stat-shifts');
+            const statDrafts = document.getElementById('stat-drafts');
+
+            if (statShifts) {
+                const totalShifts = events ? events.filter(e => e.times && e.times.length > 0).length : 0;
+                statShifts.textContent = totalShifts || '0';
+                statShifts.classList.remove('pulse-loading');
+            }
+            if (statDrafts) {
+                const totalDrafts = events ? events.filter(e => e.status === 'Generated' || e.status === 'Email Sent').length : 0;
+                statDrafts.textContent = totalDrafts || '0';
+                statDrafts.classList.remove('pulse-loading');
+            }
+
+            if (!events || !events.length) {
+                if (eventsCard) eventsCard.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><div class="empty-title">No events found</div><div class="empty-desc">There are no events for this month.</div></div>`;
+                if (dashCard) dashCard.innerHTML = `<div class="empty"><div class="empty-icon">📅</div><div class="empty-title">No upcoming events</div></div>`;
+                return;
+            }
+            if (eventsCard) eventsCard.innerHTML = events.map((evt, i) => `
+      <div class="event-row">
+        <div class="event-dot" style="background:${colors[i % colors.length]};"></div>
+        <div class="event-info"><div class="event-name">${evt.name}</div><div class="event-meta">${evt.date} · ${evt.location} · ${evt.eventTime || ''}</div></div>
+        ${getStatusBadge(evt)}
+        <button class="btn btn-ghost btn-sm" onclick="viewEvent(${i})">View</button>
+      </div>`).join('');
+            if (dashCard) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                let upcoming = events.filter(e => {
+                    const evtDate = new Date(e.date);
+                    return !isNaN(evtDate) && evtDate >= today;
+                });
+                upcoming.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                if (!upcoming.length) {
+                    dashCard.innerHTML = `<div class="empty"><div class="empty-icon">📅</div><div class="empty-title">No upcoming events</div></div>`;
+                } else {
+                    dashCard.innerHTML = upcoming.slice(0, 4).map((evt, i) => `
+      <div class="event-row">
+        <div class="event-dot" style="background:${colors[i % colors.length]};"></div>
+        <div class="event-info"><div class="event-name">${evt.name}</div><div class="event-meta">${evt.date} · ${evt.location}</div></div>
+        ${getStatusBadge(evt)}
+      </div>`).join('');
+                }
+            }
+
+            populateEventSelects(events);
+        }
+
+        function renderEventsModal(events) {
+            const body = document.getElementById('stat-events-modal-body');
+            if (!events || !events.length) { body.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><div class="empty-title">No events found here</div></div>`; return; }
+            body.innerHTML = `<table><thead><tr><th>Event</th><th>Date</th><th>Venue</th><th>Status</th></tr></thead><tbody>
+      ${events.map(e => `<tr><td>${e.name}</td><td>${e.date}</td><td>${e.location}</td><td>${getStatusBadge(e)}</td></tr>`).join('')}
+    </tbody></table>`;
+        }
+
+        function openAllEventsModal() {
+            if (!EVENTS_DATA) return;
+            document.getElementById('stat-events-modal-title').textContent = 'Events — ' + (typeof MONTH_NAMES !== 'undefined' ? MONTH_NAMES[currentMonth] : '') + ' ' + currentYear;
+            renderEventsModal(EVENTS_DATA);
+            openModal('modal-stat-events');
+        }
+
+        function openShiftsModal() {
+            if (!EVENTS_DATA) return;
+            const filtered = EVENTS_DATA.filter(e => e.times && e.times.length > 0);
+            document.getElementById('stat-events-modal-title').textContent = 'Events with generated shifts (' + filtered.length + ')';
+            renderEventsModal(filtered);
+            openModal('modal-stat-events');
+        }
+
+        function openDraftsModal() {
+            if (!EVENTS_DATA) return;
+            const filtered = EVENTS_DATA.filter(e => e.status === 'Generated' || e.status === 'Email Sent');
+            document.getElementById('stat-events-modal-title').textContent = 'Pending schedule drafts (' + filtered.length + ')';
+            renderEventsModal(filtered);
+            openModal('modal-stat-events');
+        }
+
+        function populateEventSelects(events) {
+            const hasShifts = (e) => ['Shifts Built', 'Staff Assigned', 'Email Sent', 'Generated'].includes(e.status);
+            const hasAssignment = (e) => ['Staff Assigned', 'Email Sent', 'Generated'].includes(e.status);
+
+            const allOpts = events.map((e, i) => `<option value="${i}">${e.name} — ${e.date}</option>`).join('');
+
+            const assignableOpts = events.filter(hasShifts).map(e => {
+                const i = events.indexOf(e);
+                return `<option value="${i}">${e.name} — ${e.date}</option>`;
+            }).join('');
+
+            const assignedOpts = events.filter(hasAssignment).map(e => {
+                const i = events.indexOf(e);
+                return `<option value="${i}">${e.name} — ${e.date}</option>`;
+            }).join('');
+
+            const clientOpts = events.filter(e => hasAssignment(e) && e.location && e.location.toLowerCase().includes('intuit')).map(e => {
+                const i = events.indexOf(e);
+                return `<option value="${i}">${e.name} — ${e.date}</option>`;
+            }).join('');
+
+            const configs = {
+                'assign-event-select': assignableOpts,
+                'draft-event-select': assignedOpts,
+                'shift-email-event': assignedOpts,
+                'client-email-event': clientOpts
+            };
+
+            for (const [id, optionsHtml] of Object.entries(configs)) {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = '<option value="">— Select event —</option>' + (optionsHtml || '');
+            }
+
+            const reqContainer = document.getElementById('assign-shift-requirements');
+            if (reqContainer) reqContainer.innerHTML = '';
+        }
+
+        // ── MONTH NAV ─────────────────────────────────────────────
+        function changeMonth(delta) {
+            currentMonth += delta;
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            updateMonthLabel();
+            fetchEventsByMonth(currentMonth, currentYear);
+        }
+
+        // ── ROSTER ────────────────────────────────────────────────
+        async function generateRoster() {
+            const dateVal = document.getElementById('roster-date').value;
+            if (!dateVal) {
+                showToast('Please select a date first.', 'warning');
+                return;
+            }
+            const btn = document.getElementById('btn-roster');
+            btn.textContent = 'Loading...'; btn.disabled = true;
+            document.getElementById('roster-empty').style.display = 'none';
+            document.getElementById('roster-results').style.display = 'none';
+            try {
+                if (!STAFF_DATA || STAFF_DATA.length === 0) {
+                    await fetchStaff(); // ensure staff is loaded
+                }
+
+                let y, m, d;
+                if (dateVal.includes('/')) {
+                    [m, d, y] = dateVal.split('/');
+                } else {
+                    [y, m, d] = dateVal.split('-');
+                }
+
+                const targetYear = parseInt(y, 10);
+                const targetMonth = parseInt(m, 10) - 1;
+
+                // Sync global pointer if looking at a future/past month so EVENTS_DATA loads properly
+                if (window.currentMonth !== targetMonth || window.currentYear !== targetYear) {
+                    window.currentMonth = targetMonth;
+                    window.currentYear = targetYear;
+                    document.querySelectorAll('.month-display').forEach(el => el.textContent = MONTH_NAMES[currentMonth] + ' ' + currentYear);
+                }
+
+                // Soft fallback to load events if missing, without destroying volatile session memory
+                if (!window.EVENTS_DATA || window.EVENTS_DATA.length === 0 || (!EVENTS_CACHE[targetMonth + '-' + targetYear])) {
+                    await fetchEventsByMonth(targetMonth, targetYear);
+                } else if (EVENTS_CACHE[targetMonth + '-' + targetYear]) {
+                    // Pull from cache immediately to ensure current map applies perfectly
+                    EVENTS_DATA = EVENTS_CACHE[targetMonth + '-' + targetYear];
+                }
+                const comparisonDate = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+
+                const dateObj = new Date(y, m - 1, d);
+                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                const dayName = days[dateObj.getDay()];
+                const availKey = 'avail' + dayName;
+
+                const assignedStaffMap = {};
+                if (window.EVENTS_DATA) {
+                    EVENTS_DATA.forEach(evt => {
+                        let evtDateStr = '';
+                        if (typeof evt.date === 'string' && evt.date.includes('T')) {
+                            const [ey, em, ed] = evt.date.split('T')[0].split('-');
+                            evtDateStr = `${ey}-${em.padStart(2, '0')}-${ed.padStart(2, '0')}`;
+                        } else {
+                            const ed = new Date(evt.date);
+                            evtDateStr = `${ed.getFullYear()}-${(ed.getMonth() + 1).toString().padStart(2, '0')}-${ed.getDate().toString().padStart(2, '0')}`;
+                        }
+
+                        if (evtDateStr === comparisonDate) {
+                            // 1. Check local unsynced edits in session memory (Rich format)
+                            if (evt.assignedList) {
+                                evt.assignedList.forEach(shiftGroup => {
+                                    if (shiftGroup.staff && shiftGroup.staff.length) {
+                                        shiftGroup.staff.forEach(s => {
+                                            if (s && s.fullName) {
+                                                assignedStaffMap[s.fullName] = evt.name;
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                            // 2. Check canonical database fetch (Fast string array)
+                            if (evt.serverAssignedNames && evt.serverAssignedNames.length) {
+                                evt.serverAssignedNames.forEach(staffName => {
+                                    assignedStaffMap[staffName] = evt.name;
+                                });
+                            }
+                        }
+                    });
+                }
+
+                const available = [];
+                const unavailable = [];
+
+                STAFF_DATA.forEach(s => {
+                    const avail = s[availKey] ? s[availKey].toString() : '';
+                    let isAvailable = avail && avail.toLowerCase().indexOf('unavailable') === -1 && avail.trim() !== '';
+
+                    if (isAvailable && s.blackoutDays) {
+                        const bDays = s.blackoutDays.toString().split(',').map(x => x.trim());
+                        // Account for leading zeros if any
+                        if (bDays.includes(parseInt(d).toString()) || bDays.includes(d)) {
+                            isAvailable = false;
+                        }
+                    }
+
+                    const rosterEmployee = {
+                        fullName: s.fullName,
+                        position: s.position || 'Staff - TBD',
+                        available: isAvailable,
+                        availability: avail || 'Unavailable',
+                        assignedEvent: assignedStaffMap[s.fullName] || null
+                    };
+                    if (isAvailable) available.push(rosterEmployee);
+                    else unavailable.push(rosterEmployee);
+                });
+
+                document.getElementById('roster-available-title').textContent = '✓ Available (' + available.length + ')';
+                document.getElementById('roster-unavailable-title').textContent = '✗ Not Available (' + unavailable.length + ')';
+
+                document.getElementById('roster-available').innerHTML = available.map(s => {
+                    const initials = (s.fullName || '').trim().split(/\s+/).map(w => w ? w[0] : '').join('').slice(0, 2);
+                    const tagHtml = s.assignedEvent
+                        ? '<span class="tag roster-assigned" style="background:#e0e7ff;color:#4f46e5;padding:2px 8px;border-radius:12px;font-size:11px;">Assigned</span>'
+                        : '<span class="tag roster-available" style="background:#dcfce7;color:#16a34a;padding:2px 8px;border-radius:12px;font-size:11px;">Free</span>';
+                    const detailHtml = s.assignedEvent || '—';
+                    return `<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="width:26px;height:26px;font-size:10px;">${initials}</div>${s.fullName}</div></td><td>${s.position}</td><td>${tagHtml}</td><td style="font-size:12px;color:${s.assignedEvent ? 'var(--navy)' : 'var(--text-muted)'};font-weight:${s.assignedEvent ? '500' : 'normal'};">${detailHtml}</td></tr>`;
+                }).join('');
+
+                document.getElementById('roster-unavailable').innerHTML = unavailable.map(s => {
+                    const initials = (s.fullName || '').trim().split(/\s+/).map(w => w ? w[0] : '').join('').slice(0, 2);
+                    return `<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="width:26px;height:26px;font-size:10px;background:#fee2e2;color:#ef4444;">${initials}</div>${s.fullName}</div></td><td>${s.position}</td></tr>`;
+                }).join('');
+
+                document.getElementById('roster-results').style.display = 'block';
+            } catch (e) {
+                console.error('Roster error:', e);
+                showToast('Error loading roster.', '');
+                document.getElementById('roster-empty').style.display = 'block';
+            } finally {
+                btn.textContent = 'Generate Roster'; btn.disabled = false;
+            }
+        }
+
+        // ── EVENT VIEW ────────────────────────────────────────────
+        function viewEvent(index) {
+            const evt = EVENTS_DATA[index];
+            if (!evt) return;
+            document.getElementById('event-view-title').textContent = evt.name;
+            document.getElementById('event-view-subtitle').textContent = evt.date + ' · ' + evt.location + ' · ' + (evt.eventTime || '');
+            const statusBadgeText = getStatusBadge(evt);
+            
+            let totalStaffCount = 0;
+            if (evt.assignedList && evt.assignedList.length > 0) {
+                totalStaffCount = evt.assignedList.reduce((acc, shift) => acc + (shift.staff ? shift.staff.length : 0), 0);
+            } else if (evt.serverAssignedNames && evt.serverAssignedNames.length > 0) {
+                totalStaffCount = evt.serverAssignedNames.length;
+            }
+
+            let extraHTML = `<div class="no-shifts-msg">To view shift details and staff assignments, run <strong>Assign Staff</strong> from the Events page.</div>`;
+
+            if (['Staff Assigned', 'Email Sent', 'Generated'].includes(evt.status)) {
+                if (evt.assignedList && evt.assignedList.length > 0) {
+                    let missingAlertHTML = '';
+                    let aggregatedMissing = [];
+                    evt.assignedList.forEach(shiftObj => {
+                        if (shiftObj.missing && shiftObj.missing.length > 0) {
+                            shiftObj.missing.forEach(m => {
+                                aggregatedMissing.push(`<b>${m.count}x</b> ${m.pos} (${shiftObj.time})`);
+                            });
+                        }
+                    });
+
+                    if (aggregatedMissing.length > 0) {
+                        missingAlertHTML = `
+                        <div style="margin-top:24px; padding:12px 16px; font-size:13px; color:#b91c1c; background:#fef2f2; border:1px solid #fee2e2; border-radius:6px; display:flex; align-items:flex-start; gap:12px;">
+                            <span style="font-size:18px; line-height:1;">⚠️</span>
+                            <div>
+                                <div style="font-weight:600; margin-bottom:4px; color:#991b1b;">Missing Required Staff</div>
+                                <div style="color:#b91c1c; line-height:1.5;">${aggregatedMissing.join('<br>')}</div>
+                            </div>
+                        </div>`;
+                    }
+
+                    extraHTML = missingAlertHTML + `<div style="margin-top:24px; margin-bottom:12px; font-weight:600; font-size:15px; color:var(--text); border-bottom:1px solid var(--border); padding-bottom:8px;">Assigned Schedules</div>`;
+
+                    evt.assignedList.forEach(shiftObj => {
+                        let shiftContent = '';
+                        if (shiftObj.staff && shiftObj.staff.length > 0) {
+                            const rankPos = (p) => {
+                                const str = (p || '').toLowerCase();
+                                if (str.includes('lead')) return 1;
+                                if (str.includes('manager')) return 2;
+                                if (str.includes('clerk')) return 3;
+                                if (str.includes('specialist')) return 4;
+                                return 5;
+                            };
+                            const sortedStaff = [...shiftObj.staff].sort((a, b) => rankPos(a.position) - rankPos(b.position));
+
+                            sortedStaff.forEach((s, idx) => {
+                                const borderStyle = idx < sortedStaff.length - 1 ? 'border-bottom:1px solid #f1f5f9;' : '';
+                                let tags = '';
+                                if (s.venueMatch) tags += ` <span style="font-size:10px; background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:10px; border:1px solid #bae6fd; margin-left:8px;" title="Stadium Match">📍 Venue Match</span>`;
+                                if (s.timeMatch) tags += ` <span style="font-size:10px; background:#fef3c7; color:#b45309; padding:2px 6px; border-radius:10px; border:1px solid #fde68a; margin-left:4px;" title="Schedule Match">🕒 Time Match</span>`;
+
+                                shiftContent += `<tr style="${borderStyle}">
+                                       <td style="padding:10px 16px; display:flex; align-items:center;">
+                                           <span style="font-weight:500;">${s.fullName}</span>${tags}
+                                       </td>
+                                       <td style="padding:10px 16px; color:var(--text-muted);">${s.position || '—'}</td>
+                                       <td style="padding:10px 16px; text-align:right;">
+                                            <button class="btn btn-ghost" style="padding:4px 8px; min-height:0; height:auto; font-size:12px; color:#ef4444;" onclick="removeStaffFromEvent(${index}, '${shiftObj.time}', '${s.fullName.replace(/'/g, "\\'")}')">Remove</button>
+                                       </td>
+                                    </tr>`;
+                            });
+                        } else {
+                            shiftContent = `<tr><td colspan="3" style="padding:16px; font-size:13px; color:#b45309; background:#fffbeb; text-align:center;">No staff assigned to this shift.</td></tr>`;
+                        }
+
+                        const shiftStaffCount = shiftObj.staff ? shiftObj.staff.length : 0;
+                        extraHTML += `
+                            <div style="margin-bottom:16px; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden; box-shadow:0 1px 2px rgba(0,0,0,0.05);">
+                                <div style="background:var(--navy); padding:10px 16px; font-weight:600; font-size:13px; color:#ffffff; display:flex; align-items:center; justify-content:space-between;">
+                                    <div>🕒 ${shiftObj.time}</div>
+                                    <div style="font-weight:400; font-size:12px; background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:12px;">${shiftStaffCount} staff</div>
+                                </div>
+                                <table style="width:100%; text-align:left; border-collapse:collapse; font-size:13px; background:#ffffff;">
+                                   <tbody>
+                                      ${shiftContent}
+                                      <tr style="background:#f8fafc; border-top:1px solid #e2e8f0;">
+                                          <td colspan="3" style="padding:10px 16px;">
+                                              <div style="display:flex; gap:8px; align-items:center;">
+                                                  <select id="add-staff-select-${index}-${shiftObj.time.replace(/[\s:]/g, '')}" class="input" style="flex:1; padding:6px 10px; font-size:13px; height:auto; min-height:0;">
+                                                      <option value="">— Select staff to add —</option>
+                                                      ${STAFF_DATA.filter(st => {
+                                                          if (!evt.assignedList) return true;
+                                                          for (let sh of evt.assignedList) {
+                                                              if (sh.staff && sh.staff.some(s => s.fullName === st.fullName)) return false;
+                                                          }
+                                                          return true;
+                                                      }).map(st => `<option value="${st.fullName.replace(/"/g, '&quot;')}">${st.fullName} (${st.position || 'Staff'})</option>`).join('')}
+                                                  </select>
+                                                  <button class="btn btn-primary" style="padding:6px 12px; font-size:12px; height:auto; min-height:0;" onclick="addStaffToEvent(${index}, '${shiftObj.time}')">Add</button>
+                                              </div>
+                                          </td>
+                                      </tr>
+                                   </tbody>
+                                </table>
+                            </div>`;
+                    });
+                } else if (evt.serverAssignedNames && evt.serverAssignedNames.length > 0) {
+                    extraHTML = `
+                        <div style="margin-bottom:16px; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">
+                            <div style="background:var(--navy); padding:10px 16px; font-weight:600; font-size:13px; color:#ffffff; display:flex; align-items:center;">
+                                👥 Staff Assigned (Loaded from History)
+                            </div>
+                            <div style="padding:16px; background:#fff;">
+                                <ul style="margin:0; padding-left:20px; font-size:14px; color:var(--text);">
+                                    ${evt.serverAssignedNames.map(name => `<li style="margin-bottom:4px;">${name}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>`;
+                } else {
+                    extraHTML = `<div class="no-shifts-msg" style="color:var(--success);">Staff assignment has been requested but backend shifts list is empty.</div>`;
+                }
+            }
+
+            document.getElementById('event-view-body').innerHTML = `
+      <div class="event-view-info">
+        <div><div class="event-view-label">Date</div><div class="event-view-value">${evt.date}</div></div>
+        <div><div class="event-view-label">Venue</div><div class="event-view-value">${evt.location}</div></div>
+        <div><div class="event-view-label">Event Time</div><div class="event-view-value">${evt.eventTime || '—'}</div></div>
+        <div><div class="event-view-label">Status</div><div class="event-view-value">${statusBadgeText}</div></div>
+        <div><div class="event-view-label">Total Staff</div><div class="event-view-value">${totalStaffCount > 0 ? totalStaffCount + ' assigned' : '—'}</div></div>
+      </div>
+      ${extraHTML}`;
+
+            const draftBtn = document.getElementById('btn-event-view-draft');
+            if (evt.status !== 'Generated' && evt.status !== 'Staff Assigned' && evt.status !== 'Email Sent') {
+                draftBtn.disabled = true;
+                draftBtn.style.opacity = '0.5';
+                draftBtn.style.cursor = 'not-allowed';
+                draftBtn.title = 'Staff must be assigned first';
+                draftBtn.onclick = null;
+            } else {
+                draftBtn.disabled = false;
+                draftBtn.style.opacity = '1';
+                draftBtn.style.cursor = 'pointer';
+                draftBtn.title = '';
+                draftBtn.onclick = () => {
+                    closeModal('modal-event-view');
+                    runGmailDraft(index);
+                };
+            }
+
+            openModal('modal-event-view');
+        }
+
+        window.removeStaffFromEvent = function(evtIdx, shiftTime, fullName) {
+            const evt = EVENTS_DATA[evtIdx];
+            if (!evt || !evt.assignedList) return;
+            const shiftObj = evt.assignedList.find(s => s.time === shiftTime);
+            if (!shiftObj || !shiftObj.staff) return;
+            
+            shiftObj.staff = shiftObj.staff.filter(s => s.fullName !== fullName);
+            
+            const builderEvt = EVENTS_BUILDER.find(e => e.id === evt.id);
+            if (builderEvt) builderEvt.assignedList = evt.assignedList;
+            
+            showToast('Staff removed temporarily. Generate the draft again to apply.', 'success');
+            viewEvent(evtIdx);
+            if (typeof renderEventsFromSheet === 'function') renderEventsFromSheet(EVENTS_DATA);
+        };
+
+        window.addStaffToEvent = function(evtIdx, shiftTime) {
+            const evt = EVENTS_DATA[evtIdx];
+            if (!evt || !evt.assignedList) return;
+            const shiftObj = evt.assignedList.find(s => s.time === shiftTime);
+            if (!shiftObj) return;
+            
+            const selectId = `add-staff-select-${evtIdx}-${shiftTime.replace(/[\s:]/g, '')}`;
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            const fullName = select.value;
+            if (!fullName) return;
+            
+            if (!shiftObj.staff) shiftObj.staff = [];
+            
+            if (shiftObj.staff.some(s => s.fullName === fullName)) {
+                showToast('Staff already assigned here', 'warning');
+                return;
+            }
+            
+            const fullStaff = STAFF_DATA.find(s => s.fullName === fullName);
+            if (!fullStaff) return;
+            
+            shiftObj.staff.push({
+                fullName: fullStaff.fullName,
+                position: fullStaff.position || 'Staff - TBD',
+                venueMatch: false,
+                timeMatch: false
+            });
+            
+            const builderEvt = EVENTS_BUILDER.find(e => e.id === evt.id);
+            if (builderEvt) builderEvt.assignedList = evt.assignedList;
+            
+            showToast('Staff added! Generate draft again to apply to email.', 'success');
+            viewEvent(evtIdx);
+            if (typeof renderEventsFromSheet === 'function') renderEventsFromSheet(EVENTS_DATA);
+        };
+
+        // ── NAV / MODAL ───────────────────────────────────────────
+        function showPage(id, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            document.getElementById('page-' + id).classList.add('active');
+            if (el) el.classList.add('active');
+        }
+        function openModal(id) {
+            if (id === 'modal-shifts-builder') buildShiftsModal();
+            if (id === 'modal-eventtab') {
+                const sel = document.getElementById('assign-event-select');
+                if (sel) sel.value = '';
+                const req = document.getElementById('assign-shift-requirements');
+                if (req) req.innerHTML = '';
+            }
+            document.getElementById(id).classList.add('open');
+        }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+        document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', function (e) { if (e.target === this) this.classList.remove('open'); }));
+
+        // ── SHIFTS BUILDER ────────────────────────────────────────
+        function buildShiftsModal() {
+            const body = document.getElementById('shifts-builder-body');
+            if (!EVENTS_DATA.length) { body.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">No events loaded. Sync your calendar first.</p>'; return; }
+            EVENTS_BUILDER.length = 0;
+            EVENTS_DATA.forEach((evt, i) => {
+                EVENTS_BUILDER.push({ id: i + 1, name: evt.name, date: evt.date, venue: evt.location, times: evt.times ? [...evt.times] : [] });
+            });
+            body.innerHTML = EVENTS_BUILDER.map(evt => `
+      <div class="shift-event-block">
+        <div class="shift-event-header"><div><div class="shift-event-name">${evt.name}</div><div class="shift-event-meta">${evt.date} · ${evt.venue}</div></div>
+        <span class="badge ${evt.times.length > 0 ? 'badge-green' : 'badge-gray'}" id="badge-${evt.id}">${evt.times.length > 0 ? evt.times.length + ' shift' + (evt.times.length > 1 ? 's' : '') : 'No shifts yet'}</span></div>
+        <div class="shift-event-body">
+          <div class="shift-times-label">Shift start times</div>
+          <div class="shift-times-grid" id="times-${evt.id}">${evt.times.map(t => `<div class="shift-time-pill">${t}<button class="shift-time-remove" onclick="removeTime(${evt.id}, '${t}')">×</button></div>`).join('')}</div>
+          <div class="shift-time-add"><input type="text" placeholder="e.g. 6:00 AM" id="time-input-${evt.id}" onkeydown="if(event.key==='Enter') addTime(${evt.id})"><button onclick="addTime(${evt.id})">+ Add shift</button></div>
+        </div>
+      </div>`).join('');
+        }
+
+        function addTime(eventId) {
+            const input = document.getElementById('time-input-' + eventId);
+            let val = input.value.trim();
+            if (!val) return;
+            let success = false;
+
+            try {
+                let str = val.toLowerCase().replace(/\s+/g, '');
+                let isPM = str.includes('p');
+                let isAM = str.includes('a');
+                str = str.replace(/[^\d:]/g, '');
+
+                if (str) {
+                    let h, m = 0;
+                    if (str.includes(':')) {
+                        const parts = str.split(':');
+                        h = parseInt(parts[0], 10);
+                        m = parseInt(parts[1], 10) || 0;
+                    } else {
+                        h = parseInt(str, 10);
+                    }
+
+                    if (!isNaN(h)) {
+                        if (h > 24 || m > 59 || h < 0 || m < 0) {
+                            showToast(`Hora inválida.`, 'warning');
+                            return;
+                        }
+                        
+                        if (h >= 13 && h <= 23) {
+                            h -= 12;
+                            isPM = true;
+                        } else if (h === 24 || h === 0) {
+                            h = 12;
+                            isPM = false;
+                        } else if (h === 12 && !isAM) {
+                            isPM = true;
+                        } else if (!isAM && !isPM && h < 12) {
+                            showToast(`Por favor específica AM o PM.`, 'warning');
+                            return;
+                        }
+
+                        const minStr = m.toString().padStart(2, '0');
+                        val = `${h}:${minStr} ${isPM ? 'PM' : 'AM'}`;
+                        success = true;
+                    }
+                }
+            } catch (e) { }
+
+            if (!success) {
+                showToast(`Formato de hora inválido.`, 'warning');
+                return;
+            }
+
+            const evt = EVENTS_BUILDER.find(e => e.id === eventId);
+            if (!evt || evt.times.includes(val)) { input.value = ''; return; }
+            evt.times.push(val); input.value = ''; refreshEventBlock(eventId);
+        }
+        function removeTime(eventId, time) {
+            const evt = EVENTS_BUILDER.find(e => e.id === eventId);
+            evt.times = evt.times.filter(t => t !== time); refreshEventBlock(eventId);
+        }
+        function refreshEventBlock(eventId) {
+            const evt = EVENTS_BUILDER.find(e => e.id === eventId);
+            document.getElementById('times-' + eventId).innerHTML = evt.times.map(t => `<div class="shift-time-pill">${t}<button class="shift-time-remove" onclick="removeTime(${eventId},'${t}')">×</button></div>`).join('');
+            const badge = document.getElementById('badge-' + eventId);
+            badge.className = 'badge ' + (evt.times.length > 0 ? 'badge-green' : 'badge-gray');
+            badge.textContent = evt.times.length > 0 ? evt.times.length + ' shift' + (evt.times.length > 1 ? 's' : '') : 'No shifts yet';
+        }
+        function runGenerateShifts() {
+            if (!EVENTS_BUILDER.some(e => e.times.length > 0)) { showToast('Add at least one shift time.'); return; }
+            closeModal('modal-shifts-builder');
+
+            for (let i = 0; i < EVENTS_DATA.length; i++) {
+                const builderEvent = EVENTS_BUILDER.find(e => e.id === i + 1);
+                if (builderEvent && builderEvent.times && builderEvent.times.length > 0) {
+                    EVENTS_DATA[i].times = [...builderEvent.times];
+                    if (EVENTS_DATA[i].status === 'Pending') {
+                        EVENTS_DATA[i].status = 'Shifts Built';
+                    }
+                }
+            }
+            if (typeof renderEventsFromSheet === 'function') renderEventsFromSheet(EVENTS_DATA);
+
+            showToast('✓ Shifts generated!', 'success');
+        }
+
+        // ── LOADING / UTILS ───────────────────────────────────────
+        function showLoading(id, rows) {
+            const el = document.getElementById(id); if (!el) return;
+            el.innerHTML = Array(rows).fill(`<tr><td colspan="5"><div style="height:16px;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:4px;"></div></td></tr>`).join('');
+        }
+        function showToast(msg, type = '') {
+            const t = document.createElement('div');
+            t.className = 'toast ' + type; t.textContent = msg;
+            document.getElementById('toasts').appendChild(t);
+            setTimeout(() => t.remove(), 3500);
+        }
+        function runSync() { closeModal('modal-sync'); showToast('✓ Syncing calendar...', 'success'); fetchEvents(); }
+        function runAction(modalId, msg) {
+            closeModal(modalId);
+            showToast('✓ ' + msg, 'success');
+        }
+
+        function buildRequirementsForm() {
+            const container = document.getElementById('assign-shift-requirements');
+            const selectEvent = document.getElementById('assign-event-select');
+            container.innerHTML = '';
+            const idxStr = selectEvent.value;
+            if (idxStr === '' || idxStr === '— Select event —') return;
+            const evt = EVENTS_DATA[parseInt(idxStr)];
+            if (!evt) return;
+
+            let times = evt.times && evt.times.length ? evt.times : [evt.eventTime || 'TBD'];
+            let html = `<p style="font-weight:600; margin-bottom:8px; font-size:14px; margin-top:20px;">Shift Requirements</p>`;
+
+            times.forEach((t, timeIdx) => {
+                let reqsHTML = '';
+                let savedReqs = evt.savedRequirements ? evt.savedRequirements.find(r => r.time === t) : null;
+
+                if (savedReqs && savedReqs.reqs && savedReqs.reqs.length > 0) {
+                    savedReqs.reqs.forEach(req => {
+                        const isSelected = (val) => req.pos === val ? 'selected' : '';
+                        reqsHTML += `<div class="req-row" style="display:flex; gap:8px; margin-bottom:8px;">
+                           <input type="number" min="1" value="${req.count}" class="input req-count" style="width:60px; padding:6px;">
+                           <select class="input req-pos" style="flex:1; padding:6px;">
+                               <option value="Mobility Solution Lead" ${isSelected('Mobility Solution Lead')}>Mobility Solution Lead</option>
+                               <option value="Mobility Operations Manager" ${isSelected('Mobility Operations Manager')}>Mobility Operations Manager</option>
+                               <option value="Mobility Hub Manager" ${isSelected('Mobility Hub Manager')}>Mobility Hub Manager</option>
+                               <option value="Mobility Solution Clerk" ${isSelected('Mobility Solution Clerk')}>Mobility Solution Clerk</option>
+                               <option value="Mobility Solution Specialist" ${isSelected('Mobility Solution Specialist')}>Mobility Solution Specialist</option>
+                               <option value="Staff - TBD" ${isSelected('Staff - TBD')}>Staff - TBD</option>
+                           </select>
+                           <button class="btn btn-ghost" onclick="this.parentElement.remove()" style="padding:0 8px;">×</button>
+                       </div>`;
+                    });
+                } else {
+                    reqsHTML = `<div class="req-row" style="display:flex; gap:8px; margin-bottom:8px;">
+                           <input type="number" min="1" value="1" class="input req-count" style="width:60px; padding:6px;">
+                           <select class="input req-pos" style="flex:1; padding:6px;">
+                               <option value="Mobility Solution Lead" selected>Mobility Solution Lead</option>
+                               <option value="Mobility Operations Manager">Mobility Operations Manager</option>
+                               <option value="Mobility Hub Manager">Mobility Hub Manager</option>
+                               <option value="Mobility Solution Clerk">Mobility Solution Clerk</option>
+                               <option value="Mobility Solution Specialist">Mobility Solution Specialist</option>
+                               <option value="Staff - TBD">Staff - TBD</option>
+                           </select>
+                           <button class="btn btn-ghost" onclick="this.parentElement.remove()" style="padding:0 8px;">×</button>
+                       </div>`;
+                }
+
+                html += `
+                 <div class="shift-req-box" style="background:var(--surface); padding:10px; border-radius:6px; margin-bottom:10px; border:1px solid var(--border);">
+                    <div style="font-weight:600; font-size:13px; color:var(--text); margin-bottom:8px;">${t}</div>
+                    <div id="req-list-${idxStr}-${timeIdx}">
+                       ${reqsHTML}
+                    </div>
+                    <button class="btn btn-ghost btn-sm" onclick="addRequirement(${idxStr}, ${timeIdx})" style="font-size:12px; margin-top:4px;">+ Add Position</button>
+                 </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function addRequirement(idxStr, timeIdx) {
+            const list = document.getElementById(`req-list-${idxStr}-${timeIdx}`);
+            if (!list) return;
+            const row = document.createElement('div');
+            row.className = 'req-row';
+            row.style.cssText = 'display:flex; gap:8px; margin-bottom:8px;';
+            row.innerHTML = `<input type="number" min="1" value="1" class="input req-count" style="width:60px; padding:6px;">
+                   <select class="input req-pos" style="flex:1; padding:6px;">
+                       <option value="Mobility Solution Lead">Mobility Solution Lead</option>
+                       <option value="Mobility Operations Manager">Mobility Operations Manager</option>
+                       <option value="Mobility Hub Manager">Mobility Hub Manager</option>
+                       <option value="Mobility Solution Clerk">Mobility Solution Clerk</option>
+                       <option value="Mobility Solution Specialist">Mobility Solution Specialist</option>
+                       <option value="Staff - TBD">Staff - TBD</option>
+                   </select>
+                   <button class="btn btn-ghost" onclick="this.parentElement.remove()" style="padding:0 8px;">×</button>`;
+            list.appendChild(row);
+        }
+
+        function runAssignStaff() {
+            const selectEvent = document.getElementById('assign-event-select');
+            const idxStr = selectEvent.value;
+            if (!idxStr || idxStr === '— Select event —') return;
+            const evtIdx = parseInt(idxStr);
+            const evt = EVENTS_DATA[evtIdx];
+            if (!evt) return;
+
+            let times = evt.times && evt.times.length ? evt.times : [evt.eventTime || 'TBD'];
+            let assignedList = [];
+
+            const dateObj = new Date(evt.date);
+            const dayName = !isNaN(dateObj) ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dateObj.getDay()] : '';
+            const availKey = 'avail' + dayName;
+            const alreadyAssignedIds = new Set();
+            let totalMissing = 0;
+
+            let savedRequirements = [];
+
+            function _parseAvailTime(timeStr) {
+                if (!timeStr) return null;
+                timeStr = timeStr.toString().toLowerCase().trim();
+                const match = timeStr.match(/(\d+):?(\d*)\s*(am|pm)?/);
+                if (!match) return null;
+                let hours = parseInt(match[1]);
+                const minutes = parseInt(match[2]) || 0;
+                const period = match[3];
+                if (period === 'pm' && hours !== 12) hours += 12;
+                if (period === 'am' && hours === 12) hours = 0;
+                return hours + minutes / 60;
+            }
+
+            function _isAvailableForEvent(availStr, eventStartH, eventEndH) {
+                if (!availStr) return false;
+                const avail = availStr.toString().toLowerCase().trim();
+                if (avail.indexOf('unavailable') > -1) return false;
+                if (avail === 'open' || avail === 'available' || avail === 'anytime' ||
+                    avail === 'open availability' || avail === 'full availability' ||
+                    avail === 'available all day' || avail === 'available anytime' ||
+                    avail === 'full day') return true;
+
+                const afterMatch = avail.match(/(?:>|after)\s*(\d+:?\d*\s*(?:am|pm)?)/);
+                if (afterMatch) {
+                    const availFrom = _parseAvailTime(afterMatch[1]);
+                    if (availFrom !== null) return eventStartH >= availFrom;
+                }
+
+                const rangeMatch = avail.match(/(\d+:?\d*\s*(?:am|pm)?)\s*[-to]+\s*(\d+:?\d*\s*(?:am|pm)?)/);
+                if (rangeMatch) {
+                    const rangeStart = _parseAvailTime(rangeMatch[1]);
+                    const rangeEnd = _parseAvailTime(rangeMatch[2]);
+                    if (rangeStart !== null && rangeEnd !== null) {
+                        return eventStartH >= rangeStart && eventEndH <= rangeEnd;
+                    }
+                }
+
+                const nightMatch = avail.match(/(\d+)\s*pm\s*-\s*(\d+)\s*am/);
+                if (nightMatch) {
+                    const nightStart = parseInt(nightMatch[1]) + 12;
+                    return eventStartH >= nightStart;
+                }
+
+                return true;
+            }
+
+            times.forEach((t, timeIdx) => {
+                const shiftStartH = _parseAvailTime(t);
+                const shiftEndH = shiftStartH !== null ? shiftStartH + 8 : null;
+                const reqBoxes = document.querySelectorAll(`#req-list-${evtIdx}-${timeIdx} .req-row`);
+                let candidates = STAFF_DATA.map((s, idx) => {
+                    let score = 0;
+                    if (s.preferredVenue && evt.location && s.preferredVenue.trim().toLowerCase() === evt.location.trim().toLowerCase()) score += 5;
+                    if (s.workTimePreference && t && s.workTimePreference.trim().toLowerCase() === t.trim().toLowerCase()) score += 2;
+                    return { s, idx, score };
+                });
+                candidates.sort((a, b) => b.score - a.score);
+
+                let shiftStaff = [];
+                if (evt.assignedList) {
+                    const prevShift = evt.assignedList.find(sh => sh.time === t);
+                    if (prevShift && prevShift.staff) {
+                        prevShift.staff.forEach(st => {
+                            shiftStaff.push({...st});
+                            const candIdx = candidates.findIndex(c => c.s.fullName === st.fullName);
+                            if (candIdx >= 0) alreadyAssignedIds.add(candidates[candIdx].idx);
+                        });
+                    }
+                }
+
+                let shiftMissing = [];
+                let shiftSavedReqs = [];
+                reqBoxes.forEach(row => {
+                    const originalCount = parseInt(row.querySelector('.req-count').value) || 1;
+                    const pos = row.querySelector('.req-pos').value;
+                    shiftSavedReqs.push({ count: originalCount, pos });
+                    
+                    let preservedMatchCount = 0;
+                    shiftStaff.forEach(st => {
+                        const staffPos = st.position || 'Staff - TBD';
+                        if ((staffPos === pos || staffPos.includes(pos)) && !st._countedReq) {
+                            preservedMatchCount++;
+                            st._countedReq = true;
+                        }
+                    });
+                    
+                    const count = Math.max(0, originalCount - preservedMatchCount);
+                    let fulfilled = 0;
+                    candidates.forEach((candidate) => {
+                        const s = candidate.s;
+                        const staffIdx = candidate.idx;
+                        if (fulfilled >= count) return;
+                        if (alreadyAssignedIds.has(staffIdx)) return;
+                        const staffAvail = s[availKey] ? s[availKey].trim() : '';
+                        if (staffAvail === '') return;
+                        
+                        if (shiftStartH !== null) {
+                            if (!_isAvailableForEvent(staffAvail, shiftStartH, shiftEndH)) return;
+                        } else if (staffAvail.toLowerCase().indexOf('unavailable') !== -1) {
+                            return;
+                        }
+                        const staffPos = s.position || 'Staff - TBD';
+                        if (staffPos === pos || staffPos.includes(pos)) {
+                            shiftStaff.push({
+                                fullName: s.fullName,
+                                position: staffPos,
+                                venueMatch: (candidate.score >= 5),
+                                timeMatch: (candidate.score === 2 || candidate.score === 7)
+                            });
+                            alreadyAssignedIds.add(staffIdx);
+                            fulfilled++;
+                        }
+                    });
+                    if (fulfilled < count) {
+                        shiftMissing.push({ pos: pos, count: count - fulfilled });
+                    }
+                    totalMissing += (count - fulfilled);
+                });
+                
+                shiftStaff.forEach(st => delete st._countedReq);
+                savedRequirements.push({ time: t, reqs: shiftSavedReqs });
+                assignedList.push({ time: t, staff: shiftStaff, missing: shiftMissing });
+            });
+
+            evt.savedRequirements = savedRequirements;
+
+            evt.assignedList = assignedList;
+            evt.status = 'Staff Assigned';
+            if (typeof renderEventsFromSheet === 'function') renderEventsFromSheet(EVENTS_DATA);
+            populateEventSelects(EVENTS_DATA);
+            closeModal('modal-eventtab');
+
+            if (totalMissing > 0) {
+                showToast(`Staff assigned. Note: ${totalMissing} roles went unfilled due to lack of available staff.`, 'yellow');
+            } else {
+                showToast('✓ Staff assigned successfully!', 'success');
+            }
+        }
+
+        // ── STAFF EDIT ────────────────────────────────────────────
+        let currentStaffSearch = '', currentStaffPosition = '';
+        function filterStaff(q) { currentStaffSearch = q.toLowerCase(); applyStaffFilters(); }
+        function filterByPosition(p) { currentStaffPosition = p; applyStaffFilters(); }
+        function applyStaffFilters() {
+            document.querySelectorAll('#staff-table tr').forEach(row => {
+                const s = row.getAttribute('data-search') || '', p = row.getAttribute('data-pos') || '';
+                row.style.display = (!currentStaffSearch || s.includes(currentStaffSearch)) && (!currentStaffPosition || p === currentStaffPosition) ? '' : 'none';
+            });
+        }
+        function openEditStaffModal(fullName) {
+            const staff = STAFF_DATA.find(s => s.fullName === fullName); if (!staff) return;
+            document.getElementById('edit-staff-fullname').value = staff.fullName;
+            document.getElementById('edit-staff-name').textContent = staff.fullName;
+            document.getElementById('edit-staff-phone').value = staff.phone || '';
+            document.getElementById('edit-staff-position').value = staff.position || 'Staff - TBD';
+            document.getElementById('edit-staff-venue').value = staff.preferredVenue || '';
+            document.getElementById('edit-staff-timepref').value = staff.workTimePreference || '';
+            document.getElementById('edit-staff-blackout').value = staff.blackoutDays || '';
+            ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].forEach(d => {
+                document.getElementById('edit-avail-' + d.toLowerCase()).value = staff['avail' + d] || '';
+            });
+            openModal('modal-edit-staff');
+        }
+        async function saveStaffEdit() {
+            const btn = document.getElementById('btn-save-staff');
+            btn.textContent = 'Saving...'; btn.disabled = true;
+            const payload = {
+                action: 'updateStaff', staff: {
+                    fullName: document.getElementById('edit-staff-fullname').value,
+                    phone: document.getElementById('edit-staff-phone').value,
+                    position: document.getElementById('edit-staff-position').value,
+                    preferredVenue: document.getElementById('edit-staff-venue').value,
+                    workTimePreference: document.getElementById('edit-staff-timepref').value,
+                    blackoutDays: document.getElementById('edit-staff-blackout').value,
+                    availMon: document.getElementById('edit-avail-mon').value,
+                    availTue: document.getElementById('edit-avail-tue').value,
+                    availWed: document.getElementById('edit-avail-wed').value,
+                    availThu: document.getElementById('edit-avail-thu').value,
+                    availFri: document.getElementById('edit-avail-fri').value,
+                    availSat: document.getElementById('edit-avail-sat').value,
+                    availSun: document.getElementById('edit-avail-sun').value,
+                }
+            };
+            try {
+                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const json = await res.json();
+                if (json.status === 'ok') { showToast('✓ Staff updated!', 'success'); closeModal('modal-edit-staff'); fetchStaff(); }
+                else alert('Error: ' + json.message);
+            } catch (e) { alert('Connection error.'); }
+            finally { btn.textContent = 'Save Changes'; btn.disabled = false; }
+        }
+
+        async function runSyncBlackout() {
+            const btn = document.getElementById('btn-sync-blackout');
+            btn.textContent = 'Syncing...'; btn.disabled = true;
+            try {
+                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'syncBlackout' }) });
+                const json = await res.json();
+                if (json.status === 'ok') { showToast('✓ Blackout dates updated successfully!', 'success'); fetchStaff(); }
+                else alert('Error: ' + json.message);
+            } catch (e) { alert('Connection error.'); }
+            finally { btn.textContent = 'Sync Blackout Dates'; btn.disabled = false; }
+        }
+
+        async function runArchiveEvents() {
+            if (!confirm('Are you sure you want to archive all past events? This will move historical data offline to reduce sheet clutter.')) return;
+            const btn = document.getElementById('btn-sync-archive');
+            btn.textContent = 'Archiving...'; btn.disabled = true;
+            try {
+                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'archiveEvents' }) });
+                const json = await res.json();
+                if (json.status === 'ok') { showToast('✓ Past events archived and tables cleaned.', 'success'); fetchEvents(); }
+                else alert('Error: ' + json.message);
+            } catch (e) { alert('Connection error.'); }
+            finally { btn.textContent = 'Archive Past Events'; btn.disabled = false; }
+        }
+
+        // ── EMAIL ACTIONS ─────────────────────────────────────────
+        async function generateMonthlyEmail() {
+            const btn = document.getElementById('btn-monthly-email');
+            const monthVal = document.getElementById('monthly-email-month').value;
+            if (!monthVal) return alert('Select a month');
+            btn.textContent = 'Generating...'; btn.disabled = true;
+            try {
+                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'monthlyEmail', month: monthVal }) });
+                const json = await res.json();
+                if (json.status === 'ok') showToast('✓ ' + json.message, 'success');
+                else alert('Error: ' + json.message);
+            } catch (e) { alert('Connection error.'); }
+            finally { btn.textContent = 'Create Draft in My Gmail'; btn.disabled = false; }
+        }
+        async function generateShiftEmail() {
+            const btn = document.getElementById('btn-shift-email');
+            btn.textContent = 'Generating...'; btn.disabled = true;
+            try {
+                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'shiftEmail' }) });
+                const json = await res.json();
+                if (json.status === 'ok') {
+                    showToast('✓ ' + json.message, 'success');
+                    const selectElement = document.getElementById('shift-email-event');
+                    if (selectElement && selectElement.value !== "" && selectElement.value !== "— Select event —") {
+                        const idx = selectElement.value;
+                        if (EVENTS_DATA[idx]) {
+                            EVENTS_DATA[idx].status = 'Email Sent';
+                            if (typeof renderEventsFromSheet === 'function') renderEventsFromSheet(EVENTS_DATA);
+                        }
+                    }
+                }
+                else alert('Error: ' + json.message);
+            } catch (e) { alert('Connection error.'); }
+            finally { btn.textContent = 'Create Draft in My Gmail'; btn.disabled = false; }
+        }
+        async function generateClientEmail() {
+            const btn = document.getElementById('btn-client-email');
+            btn.textContent = 'Generating...'; btn.disabled = true;
+            try {
+                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'clientEmail' }) });
+                const json = await res.json();
+                if (json.status === 'ok') {
+                    showToast('✓ ' + json.message, 'success');
+                    const selectElement = document.getElementById('client-email-event');
+                    if (selectElement && selectElement.value !== "" && selectElement.value !== "— Select event —") {
+                        const idx = selectElement.value;
+                        if (EVENTS_DATA[idx]) {
+                            EVENTS_DATA[idx].status = 'Email Sent';
+                            if (typeof renderEventsFromSheet === 'function') renderEventsFromSheet(EVENTS_DATA);
+                        }
+                    }
+                }
+                else alert('Error: ' + json.message);
+            } catch (e) { alert('Connection error.'); }
+            finally { btn.textContent = 'Create Draft in My Gmail'; btn.disabled = false; }
+        }
+
+        // ── OAUTH CALLBACK DETECTION ──────────────────────────────
+        // Must run AFTER all functions are defined
+        // If Google redirected back here with ?code= after OAuth
+        (async () => {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            if (code) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+                const savedUser = localStorage.getItem('pending_oauth_user');
+                if (savedUser) currentUser = savedUser;
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('oauth-screen').style.display = 'flex';
+                await exchangeCode(code);
+            }
+        })();
+    </script>
+</body>
+
+</html>
