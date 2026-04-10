@@ -2921,6 +2921,12 @@
                                 </table>
                             </div>`;
                     });
+
+                    extraHTML += `
+                        <div style="margin-top:16px; text-align:center;">
+                            <button class="btn" style="background:#f1f5f9; color:#475569; border:1px dashed #cbd5e1; width:100%; padding:10px; font-weight:500;" onclick="addShiftToEvent(${index})">+ Add New Shift/Hour</button>
+                        </div>
+                    `;
                 } else if (evt.serverAssignedNames && evt.serverAssignedNames.length > 0) {
                     extraHTML = `
                         <div style="margin-bottom:16px; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">
@@ -2969,7 +2975,7 @@
             openModal('modal-event-view');
         }
 
-        window.removeStaffFromEvent = function (evtIdx, shiftTime, fullName) {
+        window.removeStaffFromEvent = async function (evtIdx, shiftTime, fullName) {
             const evt = EVENTS_DATA[evtIdx];
             if (!evt || !evt.assignedList) return;
             const shiftObj = evt.assignedList.find(s => s.time === shiftTime);
@@ -2980,12 +2986,22 @@
             const builderEvt = EVENTS_BUILDER.find(e => e.id === evt.id);
             if (builderEvt) builderEvt.assignedList = evt.assignedList;
 
-            showToast('Staff removed temporarily. Generate the draft again to apply.', 'success');
+            showToast('Saving update to Google Sheets...', 'info');
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'saveAssignments', event: evt })
+                });
+                showToast('✓ Staff removed and saved!', 'success');
+            } catch(e) {
+                console.error(e);
+            }
+
             viewEvent(evtIdx);
             if (typeof renderEventsFromSheet === 'function') renderEventsFromSheet(EVENTS_DATA);
         };
 
-        window.addStaffToEvent = function (evtIdx, shiftTime) {
+        window.addStaffToEvent = async function (evtIdx, shiftTime) {
             const evt = EVENTS_DATA[evtIdx];
             if (!evt || !evt.assignedList) return;
             const shiftObj = evt.assignedList.find(s => s.time === shiftTime);
