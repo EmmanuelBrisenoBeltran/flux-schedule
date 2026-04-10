@@ -2108,16 +2108,20 @@
         }
 
         // ── GMAIL DRAFT ──────────────────────────────────────────
-        async function createGmailDraftViaLambda(subject, htmlBody, bcc) {
+        async function createGmailDraftViaLambda(subject, htmlBody, bcc, to = '') {
             const access_token = await getAccessToken();
             if (!access_token) {
                 showToast('Gmail not connected. Connect your Gmail first.', '');
                 return false;
             }
+            let payload = { access_token, subject, htmlBody };
+            if (bcc) payload.bcc = bcc;
+            if (to) payload.to = to;
+            
             const res = await fetch(LAMBDA_URL + '/create-draft', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ access_token, subject, htmlBody, bcc })
+                body: JSON.stringify(payload)
             });
             const json = await res.json();
             if (json.success) return true;
@@ -2273,14 +2277,15 @@
                             title: 'Client Confirmation Draft',
                             subject: 'Staff Confirmation — ' + eventNameClean + ' | ' + formattedDate,
                             htmlBody: clientBodyHTML,
-                            bcc: GLOBAL_CLIENT_EMAIL
+                            to: GLOBAL_CLIENT_EMAIL,
+                            bcc: ''
                         });
                     } // close else block
                 } // close if block
 
                 // Create drafts via Lambda OAuth
                 for (const draft of draftsToCreate) {
-                    await createGmailDraftViaLambda(draft.subject, draft.htmlBody, draft.bcc);
+                    await createGmailDraftViaLambda(draft.subject, draft.htmlBody, draft.bcc, draft.to);
                 }
 
                 try {
@@ -2369,6 +2374,8 @@
                 const json = await res.json();
                 if (json.status === 'ok') {
                     EVENTS_DATA = json.data;
+                    if (json.clientEmail) GLOBAL_CLIENT_EMAIL = json.clientEmail;
+                    if (json.clientName) GLOBAL_CLIENT_NAME = json.clientName;
                     EVENTS_CACHE[currentMonth + '-' + currentYear] = EVENTS_DATA; // Init caching
                     renderEventsFromSheet(json.data);
                     const elEvts = document.getElementById('stat-events');
@@ -2396,6 +2403,8 @@
                 const json = await res.json();
                 if (json.status === 'ok') {
                     EVENTS_DATA = json.data;
+                    if (json.clientEmail) GLOBAL_CLIENT_EMAIL = json.clientEmail;
+                    if (json.clientName) GLOBAL_CLIENT_NAME = json.clientName;
                     EVENTS_CACHE[cacheKey] = EVENTS_DATA; // Save RAM session
                     renderEventsFromSheet(json.data);
                     const elEvts = document.getElementById('stat-events');
