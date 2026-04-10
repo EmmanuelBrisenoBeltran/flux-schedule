@@ -1580,7 +1580,8 @@
                     <div id="roster-results" style="display:none;">
                         <div class="card" style="margin-bottom:20px;" id="roster-assigned-container">
                             <div class="card-header">
-                                <div class="card-title" id="roster-assigned-title" style="color:#4f46e5;">⚡ Assigned</div>
+                                <div class="card-title" id="roster-assigned-title" style="color:#4f46e5;">⚡ Assigned
+                                </div>
                             </div>
                             <div class="card-body">
                                 <table>
@@ -1977,7 +1978,7 @@
     </script>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxTqglWGZCSE6xn-Uc_cAj98W4GUo95NPnZzMyn8DsXQAK2hz72IcuUzS61TlVRD6tU/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyXMqz2kzIZw9_1O1H2XLOfH-TcwSHU734W5Tb-ms2nyvzxrdy9IX_9rIOxC_RPlpFU/exec';
         const LAMBDA_URL = 'https://s4fp3l63xk.execute-api.us-east-1.amazonaws.com';
 
         // ── AUTH ─────────────────────────────────────────────────
@@ -2196,13 +2197,13 @@
                 for (let time in shiftGroups) {
                     assignmentLines += '<br><strong>' + time + ':</strong><br>';
                     for (let p of shiftGroups[time]) {
-                         assignmentLines += '&nbsp;&nbsp;- ' + p + '<br>';
+                        assignmentLines += '&nbsp;&nbsp;- ' + p + '<br>';
                     }
                 }
-                
+
                 const eventNameClean = evt.name.replace(/\s+\d+:\d+\s*(am|pm)?/gi, '').replace(/\s+\d+(am|pm)/gi, '').replace(/\s+/g, ' ').trim();
                 const subject = 'Shift Assignment - ' + eventNameClean + ' on ' + formattedDate;
-                
+
                 const fullBodyHTML = `<div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
                       Hi team,<br><br>
                       You have been assigned to the following event:<br><br>
@@ -2219,7 +2220,7 @@
                 const chunkSize = 49;
                 for (let i = 0; i < emails.length; i += chunkSize) {
                     let chunk = emails.slice(i, i + chunkSize);
-                    let draftSubject = subject + (emails.length > chunkSize ? ` (${Math.floor(i/chunkSize) + 1}/${Math.ceil(emails.length/chunkSize)})` : '');
+                    let draftSubject = subject + (emails.length > chunkSize ? ` (${Math.floor(i / chunkSize) + 1}/${Math.ceil(emails.length / chunkSize)})` : '');
                     draftsToCreate.push({
                         subject: draftSubject,
                         htmlBody: fullBodyHTML,
@@ -2232,8 +2233,8 @@
                     let clientShiftLines = '';
                     for (let time in shiftGroups) {
                         clientShiftLines += '<tr>' +
-                          '<td style="padding: 10px 16px; border-bottom: 1px solid #eee; vertical-align: top;"><strong>' + time + '</strong><br><span style="color:#666;font-size:12px;">' + shiftGroups[time].length + ' staff</span></td>' +
-                          '<td style="padding: 10px 16px; border-bottom: 1px solid #eee;"><ul style="margin:0;padding-left:16px;">';
+                            '<td style="padding: 10px 16px; border-bottom: 1px solid #eee; vertical-align: top;"><strong>' + time + '</strong><br><span style="color:#666;font-size:12px;">' + shiftGroups[time].length + ' staff</span></td>' +
+                            '<td style="padding: 10px 16px; border-bottom: 1px solid #eee;"><ul style="margin:0;padding-left:16px;">';
                         for (let p of shiftGroups[time]) {
                             clientShiftLines += '<li style="padding: 2px 0;">' + p + '</li>';
                         }
@@ -2486,7 +2487,7 @@
             if (eventsCard) {
                 let pendingHtml = '';
                 let completedHtml = '';
-                
+
                 events.forEach((evt, i) => {
                     const isCompleted = evt.status === 'Email Sent' || evt.status === 'Generated';
                     const content = `
@@ -2496,19 +2497,19 @@
                         ${getStatusBadge(evt)}
                         <button class="btn btn-ghost btn-sm" onclick="viewEvent(${i})">View</button>
                       </div>`;
-                      
+
                     if (isCompleted) {
                         completedHtml += content;
                     } else {
                         pendingHtml += content;
                     }
                 });
-                
+
                 let finalHtml = pendingHtml;
                 if (completedHtml !== '') {
                     finalHtml += `<div style="margin-top:24px; padding-bottom:8px; border-bottom:1px solid #e2e8f0; margin-bottom:12px; font-weight:600; color:#475569; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;">✓ Completed / Drafted Events</div>` + completedHtml;
                 }
-                
+
                 eventsCard.innerHTML = finalHtml;
             }
             if (dashCard) {
@@ -2642,7 +2643,7 @@
                 const dateParts = dateVal.split('-');
                 const searchDate = parseInt(dateParts[1]) + '/' + parseInt(dateParts[2]) + '/' + parseInt(dateParts[0]); // e.g. "4/1/2026"
                 let localAssignedMap = {};
-                
+
                 for (let evt of EVENTS_DATA) {
                     if (evt.date === searchDate && evt.assignedList) {
                         for (let shift of evt.assignedList) {
@@ -2738,19 +2739,19 @@
 
                 document.getElementById('roster-unavailable').innerHTML = finalUnavailable.map(s => {
                     const initials = (s.fullName || '').trim().split(/\s+/).map(w => w ? w[0] : '').join('').slice(0, 2);
-                    
+
                     let bgTag = '#fee2e2';
                     let fgTag = '#ef4444';
                     let textTag = 'Unavailable';
                     let detailTag = '—';
-                    
+
                     if (s.isBlackout) {
                         bgTag = '#e5e7eb';
                         fgTag = '#374151';
                         textTag = 'Blackout';
                         detailTag = 'Blackout Day';
                     }
-                    
+
                     const tagHtml = `<span class="tag roster-available" style="background:${bgTag};color:${fgTag};padding:2px 8px;border-radius:12px;font-size:11px;">${textTag}</span>`;
                     return `<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="width:26px;height:26px;font-size:10px;background:${bgTag};color:${fgTag};">${initials}</div>${s.fullName}</div></td><td>${s.position}</td><td>${tagHtml}</td><td style="font-size:12px;color:var(--text-muted);font-weight:normal;">${detailTag}</td></tr>`;
                 }).join('');
@@ -2866,16 +2867,16 @@
                             try {
                                 const evtDateObj = new Date(evt.date);
                                 const dayOfMonth = evtDateObj.getDate().toString();
-                                const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
                                 const dayName = days[evtDateObj.getDay()];
-                                
+
                                 if (st.blackoutDays) {
-                                   const bDays = st.blackoutDays.split(',').map(d => d.trim());
-                                   if (bDays.includes(dayOfMonth)) {
-                                       warning = ' ⚠️ (Blackout Day)';
-                                   }
+                                    const bDays = st.blackoutDays.split(',').map(d => d.trim());
+                                    if (bDays.includes(dayOfMonth)) {
+                                        warning = ' ⚠️ (Blackout Day)';
+                                    }
                                 }
-                                
+
                                 if (!warning) {
                                     const availKey = 'avail' + dayName;
                                     const availStr = st[availKey] || '';
@@ -2883,8 +2884,8 @@
                                         warning = ' ⚠️ (Unavailable)';
                                     }
                                 }
-                            } catch(e) {}
-                            
+                            } catch (e) { }
+
                             return `<option value="${st.fullName.replace(/"/g, '&quot;')}">${st.fullName} (${st.position || 'Staff'})${warning}</option>`;
                         }).join('')}
                                                   </select>
