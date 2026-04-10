@@ -3033,9 +3033,60 @@
             const builderEvt = EVENTS_BUILDER.find(e => e.id === evt.id);
             if (builderEvt) builderEvt.assignedList = evt.assignedList;
 
-            showToast('Staff added! Generate draft again to apply to email.', 'success');
+            showToast('Saving update to Google Sheets...', 'info');
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'saveAssignments', event: evt })
+                });
+                showToast('✓ Staff added and saved!', 'success');
+            } catch(e) {
+                console.error(e);
+            }
+
             viewEvent(evtIdx);
             if (typeof renderEventsFromSheet === 'function') renderEventsFromSheet(EVENTS_DATA);
+        };
+
+        window.addShiftToEvent = async function (evtIdx) {
+            const evt = EVENTS_DATA[evtIdx];
+            if (!evt) return;
+            if (!evt.assignedList) {
+                evt.assignedList = [];
+                evt.status = 'Staff Assigned';
+            }
+
+            const newTime = prompt('Enter the new shift time (e.g. "8:00 AM" or "10:30 PM"):');
+            if (!newTime || newTime.trim() === '') return;
+
+            if (evt.assignedList.find(s => s.time.toLowerCase() === newTime.trim().toLowerCase())) {
+                showToast('A shift with this time already exists.', 'warning');
+                return;
+            }
+
+            evt.assignedList.push({
+                time: newTime.trim(),
+                staff: [],
+                missing: []
+            });
+
+            const builderEvt = EVENTS_BUILDER.find(e => e.id === evt.id);
+            if (builderEvt) builderEvt.assignedList = evt.assignedList;
+
+            showToast('Saving new shift to Google Sheets...', 'info');
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'saveAssignments', event: evt })
+                });
+                showToast('✓ New shift added!', 'success');
+            } catch(e) {
+                console.error(e);
+            }
+
+            viewEvent(evtIdx);
+            if (typeof renderEventsFromSheet === 'function') renderEventsFromSheet(EVENTS_DATA);
+            populateEventSelects(EVENTS_DATA);
         };
 
         // ── NAV / MODAL ───────────────────────────────────────────
@@ -3064,8 +3115,14 @@
             if (!EVENTS_DATA.length) { body.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">No events loaded. Sync your calendar first.</p>'; return; }
             EVENTS_BUILDER.length = 0;
             EVENTS_DATA.forEach((evt, i) => {
-                EVENTS_BUILDER.push({ id: i + 1, name: evt.name, date: evt.date, venue: evt.location, times: evt.times ? [...evt.times] : [] });
+                if (!evt.status || evt.status === 'Pending') {
+                    EVENTS_BUILDER.push({ id: i + 1, name: evt.name, date: evt.date, venue: evt.location, times: evt.times ? [...evt.times] : [] });
+                }
             });
+            if (!EVENTS_BUILDER.length) {
+                body.innerHTML = '<div style="padding:40px 20px; text-align:center; color:#64748b; font-size:15px;"><div style="font-size:32px; margin-bottom:12px;">🎉</div>All upcoming events currently have their shifts built!</div>';
+                return;
+            }
             body.innerHTML = EVENTS_BUILDER.map(evt => `
       <div class="shift-event-block">
         <div class="shift-event-header"><div><div class="shift-event-name">${evt.name}</div><div class="shift-event-meta">${evt.date} · ${evt.venue}</div></div>
