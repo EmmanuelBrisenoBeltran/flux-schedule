@@ -1735,7 +1735,7 @@
                                     onclick="generateShiftEmail()">Create Draft in My Gmail</button>
                             </div>
                         </div>
-                        <div class="card">
+                        <div class="card" style="display:none;">
                             <div class="card-header">
                                 <div class="card-title">Client Confirmation</div><span class="badge badge-blue">Intuit
                                     Dome only</span>
@@ -2227,6 +2227,51 @@
                     });
                 }
 
+                // Append Client Confirmation Draft if Location is Intuit Dome
+                if (evt.location && evt.location.toLowerCase().includes('intuit') && GLOBAL_CLIENT_EMAIL) {
+                    let clientShiftLines = '';
+                    for (let time in shiftGroups) {
+                        clientShiftLines += '<tr>' +
+                          '<td style="padding: 10px 16px; border-bottom: 1px solid #eee; vertical-align: top;"><strong>' + time + '</strong><br><span style="color:#666;font-size:12px;">' + shiftGroups[time].length + ' staff</span></td>' +
+                          '<td style="padding: 10px 16px; border-bottom: 1px solid #eee;"><ul style="margin:0;padding-left:16px;">';
+                        for (let p of shiftGroups[time]) {
+                            clientShiftLines += '<li style="padding: 2px 0;">' + p + '</li>';
+                        }
+                        clientShiftLines += '</ul></td></tr>';
+                    }
+
+                    const clientBodyHTML = `<div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; max-width: 600px;">
+                        <div style="background: #1D3557; padding: 24px; border-radius: 8px 8px 0 0;">
+                        <h2 style="color: white; margin: 0; font-size: 20px;">Staff Confirmation</h2>
+                        <p style="color: #a8c4e0; margin: 4px 0 0 0;">Flux Consulting Group</p>
+                        </div>
+                        <div style="padding: 24px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 8px 8px;">
+                        <p>Dear ${GLOBAL_CLIENT_NAME || 'Client'},</p>
+                        <p>We are pleased to confirm our staff assignment for the following event:</p>
+                        <table style="width: 100%; border-collapse: collapse; margin: 16px 0; background: #f9f9f9;">
+                        <tr><td style="padding: 10px 16px; font-weight: bold; width: 40%;">Event</td><td style="padding: 10px 16px;">${eventNameClean}</td></tr>
+                        <tr><td style="padding: 10px 16px; font-weight: bold; background: #f0f0f0;">Date</td><td style="padding: 10px 16px; background: #f0f0f0;">${formattedDate}</td></tr>
+                        <tr><td style="padding: 10px 16px; font-weight: bold;">Location</td><td style="padding: 10px 16px;">${evt.location}</td></tr>
+                        </table>
+                        <p><strong>Staff deployment by shift:</strong></p>
+                        <table style="width: 100%; border-collapse: collapse; margin: 8px 0;">
+                        <thead><tr style="background: #1D3557; color: white;">
+                        <th style="padding: 10px 16px; text-align: left; width: 35%;">Shift</th>
+                        <th style="padding: 10px 16px; text-align: left;">Staff</th>
+                        </tr></thead>
+                        <tbody>${clientShiftLines}</tbody>
+                        </table>
+                        <p style="margin-top: 24px;">Please do not hesitate to contact us if you have any questions.</p>
+                        <p>Best regards,<br><strong>Flux Consulting Group</strong></p>
+                        </div></div>`;
+
+                    draftsToCreate.push({
+                        subject: 'Staff Confirmation — ' + eventNameClean + ' | ' + formattedDate,
+                        htmlBody: clientBodyHTML,
+                        bcc: GLOBAL_CLIENT_EMAIL
+                    });
+                }
+
                 // Create drafts via Lambda OAuth
                 for (const draft of draftsToCreate) {
                     await createGmailDraftViaLambda(draft.subject, draft.htmlBody, draft.bcc);
@@ -2250,6 +2295,8 @@
         let EVENTS_CACHE = {};
         let AVAILABLE_STAFF = [];
         let currentEventIndex = -1;
+        let GLOBAL_CLIENT_EMAIL = '';
+        let GLOBAL_CLIENT_NAME = '';
 
         function setGreeting() {
             const h = new Date().getHours();
@@ -2436,13 +2483,34 @@
                 if (dashCard) dashCard.innerHTML = `<div class="empty"><div class="empty-icon">📅</div><div class="empty-title">No upcoming events</div></div>`;
                 return;
             }
-            if (eventsCard) eventsCard.innerHTML = events.map((evt, i) => `
-      <div class="event-row">
-        <div class="event-dot" style="background:${colors[i % colors.length]};"></div>
-        <div class="event-info"><div class="event-name">${evt.name}</div><div class="event-meta">${evt.date} · ${evt.location} · ${evt.eventTime || ''}</div></div>
-        ${getStatusBadge(evt)}
-        <button class="btn btn-ghost btn-sm" onclick="viewEvent(${i})">View</button>
-      </div>`).join('');
+            if (eventsCard) {
+                let pendingHtml = '';
+                let completedHtml = '';
+                
+                events.forEach((evt, i) => {
+                    const isCompleted = evt.status === 'Email Sent' || evt.status === 'Generated';
+                    const content = `
+                      <div class="event-row" style="${isCompleted ? 'opacity: 0.7; background: #f8fafc;' : ''}">
+                        <div class="event-dot" style="background:${isCompleted ? '#cbd5e1' : colors[i % colors.length]};"></div>
+                        <div class="event-info"><div class="event-name">${evt.name}</div><div class="event-meta">${evt.date} · ${evt.location} · ${evt.eventTime || ''}</div></div>
+                        ${getStatusBadge(evt)}
+                        <button class="btn btn-ghost btn-sm" onclick="viewEvent(${i})">View</button>
+                      </div>`;
+                      
+                    if (isCompleted) {
+                        completedHtml += content;
+                    } else {
+                        pendingHtml += content;
+                    }
+                });
+                
+                let finalHtml = pendingHtml;
+                if (completedHtml !== '') {
+                    finalHtml += `<div style="margin-top:24px; padding-bottom:8px; border-bottom:1px solid #e2e8f0; margin-bottom:12px; font-weight:600; color:#475569; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;">✓ Completed / Drafted Events</div>` + completedHtml;
+                }
+                
+                eventsCard.innerHTML = finalHtml;
+            }
             if (dashCard) {
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
@@ -2499,8 +2567,8 @@
         }
 
         function populateEventSelects(events) {
-            const hasShifts = (e) => ['Shifts Built', 'Staff Assigned', 'Email Sent', 'Generated'].includes(e.status);
-            const hasAssignment = (e) => ['Staff Assigned', 'Email Sent', 'Generated'].includes(e.status);
+            const hasShifts = (e) => ['Shifts Built', 'Staff Assigned', 'Generated'].includes(e.status);
+            const hasAssignment = (e) => ['Staff Assigned', 'Generated'].includes(e.status);
 
             const allOpts = events.map((e, i) => `<option value="${i}">${e.name} — ${e.date}</option>`).join('');
 
@@ -2559,6 +2627,8 @@
                 const res = await fetch(API_URL + '?action=getRoster&date=' + dateVal);
                 const json = await res.json();
                 if (json.status !== 'ok') throw new Error(json.message);
+                if (json.clientEmail) GLOBAL_CLIENT_EMAIL = json.clientEmail;
+                if (json.clientName) GLOBAL_CLIENT_NAME = json.clientName;
 
                 // Fallback / Deployment Check
                 if (json.data && !json.available) {
