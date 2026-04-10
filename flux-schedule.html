@@ -1578,6 +1578,24 @@
                         </div>
                     </div>
                     <div id="roster-results" style="display:none;">
+                        <div class="card" style="margin-bottom:20px;" id="roster-assigned-container">
+                            <div class="card-header">
+                                <div class="card-title" id="roster-assigned-title" style="color:#4f46e5;">⚡ Assigned</div>
+                            </div>
+                            <div class="card-body">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Position</th>
+                                            <th>Status</th>
+                                            <th>Assigned to</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="roster-assigned"></tbody>
+                                </table>
+                            </div>
+                        </div>
                         <div class="grid-2">
                             <div class="card">
                                 <div class="card-header">
@@ -2495,28 +2513,80 @@
                     throw new Error('API Mismatch: Backend update requires redeployment. Please open Google Apps Script, go to Deploy > Manage Deployments > Edit (pencil icon) > select New version > click Deploy.');
                 }
 
-                const available = json.available || [];
-                const unavailable = json.unavailable || [];
+                let available = json.available || [];
+                let unavailable = json.unavailable || [];
 
-                document.getElementById('roster-available-title').textContent = '✓ Available (' + available.length + ')';
-                document.getElementById('roster-unavailable-title').textContent = '✗ Not Available (' + unavailable.length + ')';
+                // Cross-reference with local EVENTS_DATA assignments in the browser
+                const dateParts = dateVal.split('-');
+                const searchDate = parseInt(dateParts[1]) + '/' + parseInt(dateParts[2]) + '/' + parseInt(dateParts[0]); // e.g. "4/1/2026"
+                let localAssignedMap = {};
+                
+                for (let evt of EVENTS_DATA) {
+                    if (evt.date === searchDate && evt.assignedList) {
+                        for (let shift of evt.assignedList) {
+                            if (shift.staff) {
+                                for (let st of shift.staff) {
+                                    localAssignedMap[st.fullName] = evt.name + ' (' + evt.location + ') - ' + shift.time;
+                                }
+                            }
+                        }
+                    }
+                }
 
-                document.getElementById('roster-available').innerHTML = available.map(s => {
+                let finalAssigned = [];
+                let finalAvailable = [];
+                let finalUnavailable = [];
+
+                for (let a of available) {
+                    if (localAssignedMap[a.fullName]) {
+                        a.assignedEvent = localAssignedMap[a.fullName];
+                        finalAssigned.push(a);
+                    } else if (a.assignedEvent) {
+                        finalAssigned.push(a);
+                    } else {
+                        finalAvailable.push(a);
+                    }
+                }
+
+                for (let u of unavailable) {
+                    if (localAssignedMap[u.fullName]) {
+                        u.assignedEvent = localAssignedMap[u.fullName];
+                        finalAssigned.push(u);
+                    } else if (u.assignedEvent) {
+                        finalAssigned.push(u);
+                    } else {
+                        finalUnavailable.push(u);
+                    }
+                }
+
+                document.getElementById('roster-assigned-title').textContent = '⚡ Assigned (' + finalAssigned.length + ')';
+                document.getElementById('roster-available-title').textContent = '✓ Available (' + finalAvailable.length + ')';
+                document.getElementById('roster-unavailable-title').textContent = '✗ Not Available (' + finalUnavailable.length + ')';
+
+                if (finalAssigned.length === 0) {
+                    document.getElementById('roster-assigned-container').style.display = 'none';
+                } else {
+                    document.getElementById('roster-assigned-container').style.display = 'flex';
+                    document.getElementById('roster-assigned-container').style.flexDirection = 'column';
+                }
+
+                document.getElementById('roster-assigned').innerHTML = finalAssigned.map(s => {
                     const initials = (s.fullName || '').trim().split(/\s+/).map(w => w ? w[0] : '').join('').slice(0, 2);
-                    const tagHtml = s.assignedEvent
-                        ? '<span class="tag roster-assigned" style="background:#e0e7ff;color:#4f46e5;padding:2px 8px;border-radius:12px;font-size:11px;">Assigned</span>'
-                        : '<span class="tag roster-available" style="background:#dcfce7;color:#16a34a;padding:2px 8px;border-radius:12px;font-size:11px;">Free</span>';
+                    const tagHtml = '<span class="tag roster-assigned" style="background:#e0e7ff;color:#4f46e5;padding:2px 8px;border-radius:12px;font-size:11px;">Assigned</span>';
                     const detailHtml = s.assignedEvent || '—';
-                    return `<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="width:26px;height:26px;font-size:10px;">${initials}</div>${s.fullName}</div></td><td>${s.position}</td><td>${tagHtml}</td><td style="font-size:12px;color:${s.assignedEvent ? 'var(--navy)' : 'var(--text-muted)'};font-weight:${s.assignedEvent ? '500' : 'normal'};">${detailHtml}</td></tr>`;
+                    return `<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="width:26px;height:26px;font-size:10px;background:#e0e7ff;color:#4f46e5;">${initials}</div>${s.fullName}</div></td><td>${s.position}</td><td>${tagHtml}</td><td style="font-size:12px;color:var(--navy);font-weight:500;">${detailHtml}</td></tr>`;
                 }).join('');
 
-                document.getElementById('roster-unavailable').innerHTML = unavailable.map(s => {
+                document.getElementById('roster-available').innerHTML = finalAvailable.map(s => {
                     const initials = (s.fullName || '').trim().split(/\s+/).map(w => w ? w[0] : '').join('').slice(0, 2);
-                    const tagHtml = s.assignedEvent
-                        ? '<span class="tag roster-assigned" style="background:#fecdd3;color:#be123c;padding:2px 8px;border-radius:12px;font-size:11px;">Assigned</span>'
-                        : '<span class="tag roster-available" style="background:#fee2e2;color:#ef4444;padding:2px 8px;border-radius:12px;font-size:11px;">Unavailable</span>';
-                    const detailHtml = s.assignedEvent || '—';
-                    return `<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="width:26px;height:26px;font-size:10px;background:#fee2e2;color:#ef4444;">${initials}</div>${s.fullName}</div></td><td>${s.position}</td><td>${tagHtml}</td><td style="font-size:12px;color:${s.assignedEvent ? '#be123c' : 'var(--text-muted)'};font-weight:${s.assignedEvent ? '500' : 'normal'};">${detailHtml}</td></tr>`;
+                    const tagHtml = '<span class="tag roster-available" style="background:#dcfce7;color:#16a34a;padding:2px 8px;border-radius:12px;font-size:11px;">Free</span>';
+                    return `<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="width:26px;height:26px;font-size:10px;">${initials}</div>${s.fullName}</div></td><td>${s.position}</td><td>${tagHtml}</td><td style="font-size:12px;color:var(--text-muted);font-weight:normal;">—</td></tr>`;
+                }).join('');
+
+                document.getElementById('roster-unavailable').innerHTML = finalUnavailable.map(s => {
+                    const initials = (s.fullName || '').trim().split(/\s+/).map(w => w ? w[0] : '').join('').slice(0, 2);
+                    const tagHtml = '<span class="tag roster-available" style="background:#fee2e2;color:#ef4444;padding:2px 8px;border-radius:12px;font-size:11px;">Unavailable</span>';
+                    return `<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="width:26px;height:26px;font-size:10px;background:#fee2e2;color:#ef4444;">${initials}</div>${s.fullName}</div></td><td>${s.position}</td><td>${tagHtml}</td><td style="font-size:12px;color:var(--text-muted);font-weight:normal;">—</td></tr>`;
                 }).join('');
 
                 document.getElementById('roster-results').style.display = 'block';
@@ -2625,7 +2695,32 @@
                                 if (sh.staff && sh.staff.some(s => s.fullName === st.fullName)) return false;
                             }
                             return true;
-                        }).map(st => `<option value="${st.fullName.replace(/"/g, '&quot;')}">${st.fullName} (${st.position || 'Staff'})</option>`).join('')}
+                        }).map(st => {
+                            let warning = '';
+                            try {
+                                const evtDateObj = new Date(evt.date);
+                                const dayOfMonth = evtDateObj.getDate().toString();
+                                const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                                const dayName = days[evtDateObj.getDay()];
+                                
+                                if (st.blackoutDays) {
+                                   const bDays = st.blackoutDays.split(',').map(d => d.trim());
+                                   if (bDays.includes(dayOfMonth)) {
+                                       warning = ' ⚠️ (Blackout Day)';
+                                   }
+                                }
+                                
+                                if (!warning) {
+                                    const availKey = 'avail' + dayName;
+                                    const availStr = st[availKey] || '';
+                                    if (!availStr || availStr.toLowerCase().includes('unavailable')) {
+                                        warning = ' ⚠️ (Unavailable)';
+                                    }
+                                }
+                            } catch(e) {}
+                            
+                            return `<option value="${st.fullName.replace(/"/g, '&quot;')}">${st.fullName} (${st.position || 'Staff'})${warning}</option>`;
+                        }).join('')}
                                                   </select>
                                                   <button class="btn btn-primary" style="padding:6px 12px; font-size:12px; height:auto; min-height:0;" onclick="addStaffToEvent(${index}, '${shiftObj.time}')">Add</button>
                                               </div>
@@ -3069,6 +3164,13 @@
                         const staffIdx = candidate.idx;
                         if (fulfilled >= count) return;
                         if (alreadyAssignedIds.has(staffIdx)) return;
+
+                        const dayOfMonthStr = dateObj.getDate().toString();
+                        if (s.blackoutDays) {
+                            const bDays = s.blackoutDays.split(',').map(d => d.trim());
+                            if (bDays.includes(dayOfMonthStr)) return;
+                        }
+
                         const staffAvail = s[availKey] ? s[availKey].trim() : '';
                         if (staffAvail === '') return;
 
