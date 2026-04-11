@@ -2575,7 +2575,7 @@
                           <div class="event-row">
                             <div class="event-dot" style="background:#4ade80;"></div>
                             <div class="event-info"><div class="event-name">${evt.name}</div><div class="event-meta">${evt.date} · ${evt.location}</div></div>
-                            <span class="badge ${evt.deployments && evt.deployments.length > 0 ? 'badge-green' : 'badge-yellow'}">${evt.deployments && evt.deployments.length > 0 ? Object.keys(evt.deployments).length + ' deployed' : 'Needs deployment'}</span>
+                            <span class="badge ${evt.deployments && Object.keys(evt.deployments).length > 0 ? 'badge-green' : 'badge-yellow'}">${evt.deployments && Object.keys(evt.deployments).length > 0 ? Object.keys(evt.deployments).length + ' shifts deployed' : 'Needs deployment'}</span>
                             <button class="btn btn-primary btn-sm" onclick="viewDeployment(${i})">Map Deployments</button>
                           </div>`;
                     }
