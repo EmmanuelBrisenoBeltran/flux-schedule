@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flux Schedule — Flux Consulting Group</title>
+    <title>FluxOps — Flux Consulting Group</title>
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
         rel="stylesheet">
@@ -1301,7 +1301,7 @@
     <div id="login-screen">
         <div class="login-box">
             <div class="login-logo">F</div>
-            <div class="login-title">Flux Schedule</div>
+            <div class="login-title">FluxOps</div>
             <div class="login-subtitle">Sign in — Flux Consulting Group</div>
 
             <!-- Step 1: username/password -->
@@ -1364,7 +1364,7 @@
             <div class="nav-brand">
                 <div class="nav-logo">F</div>
                 <div>
-                    <div class="nav-title">Flux Schedule</div>
+                    <div class="nav-title">FluxOps</div>
                 </div>
             </div>
             <div class="nav-right">
@@ -1373,6 +1373,9 @@
                     <span id="nav-username"></span>
                 </span>
                 <span id="nav-gmail-status"></span>
+                <button onclick="openModal('modal-help')"
+                    style="background:transparent; border:1px solid #cbd5e1; color:#475569; margin-right:8px; border-radius:6px; padding:4px 10px; font-weight:500; cursor:pointer;"
+                    class="btn btn-ghost btn-sm">Tutorial ❓</button>
                 <button class="nav-logout" onclick="doLogout()">Sign out</button>
             </div>
         </nav>
@@ -2017,7 +2020,7 @@
     </script>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyKO27zgG0kNYJcUj6e_gBAjthUVqpgvAM4aqiAwoew6C_skN1pT0XTEEhvVjEJnS79/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwzoFJjGA-8N45ACXE-eFPKc3m0Gje-a1H3K8YSYAPlnFk32KXN1sCG5JQDWY4LJ89Y/exec';
         const LAMBDA_URL = 'https://s4fp3l63xk.execute-api.us-east-1.amazonaws.com';
 
         // ── AUTH ─────────────────────────────────────────────────
@@ -2597,7 +2600,7 @@
                     finalHtml += `
                     <details style="margin-top:24px;">
                         <summary style="cursor:pointer; padding: 12px 20px; border-bottom:1px solid #e2e8f0; border-top:1px solid #e2e8f0; margin-bottom:12px; font-weight:600; color:#475569; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; outline:none; background: #f8fafc;">
-                            ✓ Mostrar Eventos Completados / Pasados 
+                            ✓ Show Completed / Past Events 
                         </summary>
                         <div style="margin-top: 12px;">
                             ${completedHtml}
@@ -2617,7 +2620,7 @@
                             inner += `
                             <details style="margin-top:24px;">
                                 <summary style="cursor:pointer; padding: 12px 20px; border-bottom:1px solid #e2e8f0; border-top:1px solid #e2e8f0; margin-bottom:12px; font-weight:600; color:#475569; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; outline:none; background: #f8fafc;">
-                                    ✓ Mostrar Deployments Completados / Pasados 
+                                    ✓ Show Completed / Past Deployments 
                                 </summary>
                                 <div style="margin-top: 12px;">
                                     ${deploymentCompletedHtml}
@@ -3773,6 +3776,11 @@
             finally { btn.textContent = 'Create Draft in My Gmail'; btn.disabled = false; }
         }
 
+        // ── HELP MODAL ───────────────────────────────────────────────
+        function showHelp() {
+            openModal('modal-help');
+        }
+
         // ── DEPLOYMENT BUILDER ───────────────────────────────────────
 
         async function sendDeploymentEmail(evtIdx, btn) {
@@ -4058,6 +4066,100 @@
             }
         })();
     </script>
+
+    <!-- HELP MODAL -->
+    <div class="modal" id="modal-help">
+        <div class="modal-overlay" onclick="closeModal('modal-help')"></div>
+        <div class="modal-container" style="max-width: 650px;">
+            <div class="modal-header">
+                <div class="modal-title">FluxOps & Deployment Guide</div>
+                <button class="modal-close" onclick="closeModal('modal-help')">×</button>
+            </div>
+            <div class="modal-body" style="font-size: 14px; color: #334155; max-height: 70vh; overflow-y: auto;">
+                <p style="margin-bottom: 24px; color: #64748b;">Follow these steps to schedule your team, assign
+                    positions, and build the logistical parking deployments for Intuit Dome and Sofi Stadium.</p>
+
+                <div style="display:flex; gap:16px; margin-bottom:20px;">
+                    <div
+                        style="background:#0284c7; color:white; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; flex-shrink:0;">
+                        1</div>
+                    <div>
+                        <strong style="color:#0f172a; display:block; font-size:15px;">Review the Dashboard &
+                            Roster</strong>
+                        Before assigning an event, check the <span
+                            style="font-weight:600; color:#0284c7;">Dashboard</span> and <span
+                            style="font-weight:600; color:#0284c7;">Daily Roster</span> to see which staff members are
+                        marked as <strong>Available</strong>, <strong>Unavailable</strong>, or on a <strong>Blackout
+                            Day</strong>.
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:16px; margin-bottom:20px;">
+                    <div
+                        style="background:#0284c7; color:white; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; flex-shrink:0;">
+                        2</div>
+                    <div>
+                        <strong style="color:#0f172a; display:block; font-size:15px;">Build Event Shifts</strong>
+                        Navigate to the <span style="font-weight:600; color:#0284c7;">Events</span> tab. Find a
+                        <em>Pending</em> event and click <strong>Build Shifts</strong>. Here you define exactly what
+                        time blocks (Shift Hours) are needed (e.g., 4:00 PM, 7:00 PM).
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:16px; margin-bottom:20px;">
+                    <div
+                        style="background:#0284c7; color:white; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; flex-shrink:0;">
+                        3</div>
+                    <div>
+                        <strong style="color:#0f172a; display:block; font-size:15px;">Assign the General Staff
+                            Roster</strong>
+                        Once shifts are built, click <strong>View/Assign</strong> on the event. Inside, you can assign
+                        users to the shift blocks. The system will warn you ⚠️ if you select a user that is unavailable
+                        or blacked out for that date. <em>(Hold Cmd/Ctrl to select multiple users at once)</em>.
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:16px; margin-bottom:20px;">
+                    <div
+                        style="background:#0284c7; color:white; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; flex-shrink:0;">
+                        4</div>
+                    <div>
+                        <strong style="color:#0f172a; display:block; font-size:15px;">Map Deployments (Parking
+                            Zones)</strong>
+                        Go to the <span style="font-weight:600; color:#0284c7;">Deployments</span> tab. Click
+                        <strong>Map Deployments</strong> on your event.
+                        <ul style="margin:8px 0 0 -20px;">
+                            <li style="margin-bottom:6px;"><strong>Step 1:</strong> Select which parking zones and
+                                granular sub-locations (like <em>West - Prairie (Ramp)</em>) are active during each
+                                specific shift hour.</li>
+                            <li style="margin-bottom:6px;"><strong>Step 2:</strong> Allocate the staff pool (from Step
+                                3) into their physical parking zone locations.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:16px; margin-bottom:20px;">
+                    <div
+                        style="background:#16a34a; color:white; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; flex-shrink:0;">
+                        5</div>
+                    <div>
+                        <strong style="color:#0f172a; display:block; font-size:15px;">Send Automated Logistics
+                            Emails</strong>
+                        Once everything is saved, open the <strong>✓ Completed</strong> section in the Deployments tab
+                        and click the <strong>✉️ Gmail</strong> button layout. The system will automatically draft an
+                        email outlining the Shift/Location architecture and BCC all Managers/Leads assigned to the
+                        event. Check your Gmail Drafts to send!
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('modal-help')" style="width:100%;">Understood, Let's
+                    go!</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>
