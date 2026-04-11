@@ -3769,7 +3769,14 @@
         // ── DEPLOYMENT BUILDER ───────────────────────────────────────
         let currentDeploymentEventIndex = -1;
         let currentDeploymentState = {};
-        const PARKING_LOCATIONS = ['Office', 'Players', 'East', 'East - 102nd', 'Players - Internal', 'Players - 102nd & Doty', 'West - Prairie', 'West - Office', 'West - Century'];
+        const PARKING_LOCATIONS = [
+            'Office', 
+            'Players (Inside)', 'Players (Gate)', 
+            'East', 'East - 102nd', 
+            'Players - Internal', 'Players - 102nd & Doty', 
+            'West - Prairie (Ramp)', 'West - Prairie (L1)', 'West - Prairie (L2)', 'West - Prairie (L3)', 'West - Prairie (L4)', 'West - Prairie (L5)', 
+            'West - Office', 'West - Century'
+        ];
 
         function viewDeployment(evtIdx) {
             if (!EVENTS_DATA || !EVENTS_DATA[evtIdx]) return;
