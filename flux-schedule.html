@@ -2959,9 +2959,10 @@
                                       ${shiftContent}
                                       <tr style="background:#f8fafc; border-top:1px solid #e2e8f0;">
                                           <td colspan="3" style="padding:10px 16px;">
-                                              <div style="display:flex; gap:8px; align-items:center;">
-                                                  <select id="add-staff-select-${index}-${shiftObj.time.replace(/[\s:]/g, '')}" class="input" style="flex:1; padding:6px 10px; font-size:13px; height:auto; min-height:0;">
-                                                      <option value="">— Select staff to add —</option>
+                                              <div style="display:flex; gap:8px; align-items:flex-start;">
+                                                  <div style="flex:1;">
+                                                      <div style="font-size:10px; color:#64748b; margin-bottom:4px; font-weight:500; text-transform:uppercase; letter-spacing:0.5px;">Hold Cmd/Ctrl to select multiple</div>
+                                                      <select id="add-staff-select-${index}-${shiftObj.time.replace(/[\s:]/g, '')}" class="input" multiple size="4" style="width:100%; padding:6px 8px; font-size:13px; outline:none; border: 1px solid #cbd5e1;">
                                                       ${STAFF_DATA.filter(st => {
                             if (!evt.assignedList) return true;
                             for (let sh of evt.assignedList) {
@@ -3009,8 +3010,9 @@
 
                             return `<option value="${st.fullName.replace(/"/g, '&quot;')}">${st.fullName} (${st.position || 'Staff'})${warning}</option>`;
                         }).join('')}
-                                                  </select>
-                                                  <button class="btn btn-primary" style="padding:6px 12px; font-size:12px; height:auto; min-height:0;" onclick="addStaffToEvent(${index}, '${shiftObj.time}')">Add</button>
+                                                      </select>
+                                                  </div>
+                                                  <button class="btn btn-primary" style="padding:6px 12px; font-size:12px; height:auto; margin-top:20px;" onclick="addStaffToEvent(${index}, '${shiftObj.time}')">Add Selected</button>
                                               </div>
                                           </td>
                                       </tr>
@@ -3107,25 +3109,32 @@
             const selectId = `add-staff-select-${evtIdx}-${shiftTime.replace(/[\s:]/g, '')}`;
             const select = document.getElementById(selectId);
             if (!select) return;
-            const fullName = select.value;
-            if (!fullName) return;
+            
+            const selectedNames = Array.from(select.selectedOptions).map(opt => opt.value).filter(val => val !== "");
+            if (selectedNames.length === 0) return;
 
             if (!shiftObj.staff) shiftObj.staff = [];
 
-            if (shiftObj.staff.some(s => s.fullName === fullName)) {
-                showToast('Staff already assigned here', 'warning');
+            let addedCount = 0;
+            selectedNames.forEach(fullName => {
+                if (shiftObj.staff.some(s => s.fullName === fullName)) return;
+                
+                const fullStaff = STAFF_DATA.find(s => s.fullName === fullName);
+                if (!fullStaff) return;
+
+                shiftObj.staff.push({
+                    fullName: fullStaff.fullName,
+                    position: fullStaff.position || 'Staff - TBD',
+                    venueMatch: false,
+                    timeMatch: false
+                });
+                addedCount++;
+            });
+
+            if (addedCount === 0) {
+                showToast('Selected staff already assigned here', 'warning');
                 return;
             }
-
-            const fullStaff = STAFF_DATA.find(s => s.fullName === fullName);
-            if (!fullStaff) return;
-
-            shiftObj.staff.push({
-                fullName: fullStaff.fullName,
-                position: fullStaff.position || 'Staff - TBD',
-                venueMatch: false,
-                timeMatch: false
-            });
 
             const builderEvt = EVENTS_BUILDER.find(e => e.id === evt.id);
             if (builderEvt) builderEvt.assignedList = evt.assignedList;
