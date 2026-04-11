@@ -2589,10 +2589,10 @@
                 if (completedHtml !== '') {
                     finalHtml += `
                     <details style="margin-top:24px;">
-                        <summary style="cursor:pointer; padding-bottom:8px; border-bottom:1px solid #e2e8f0; margin-bottom:12px; font-weight:600; color:#475569; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; outline:none;">
+                        <summary style="cursor:pointer; padding: 12px 20px; border-bottom:1px solid #e2e8f0; border-top:1px solid #e2e8f0; margin-bottom:12px; font-weight:600; color:#475569; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; outline:none; background: #f8fafc;">
                             ✓ Mostrar Eventos Completados / Pasados 
                         </summary>
-                        <div style="margin-top: 12px; padding-left: 4px;">
+                        <div style="margin-top: 12px;">
                             ${completedHtml}
                         </div>
                     </details>`;
@@ -2607,10 +2607,15 @@
                     } else {
                         let inner = deploymentPendingHtml;
                         if (deploymentCompletedHtml !== '') {
-                            inner += `<div style="margin-top:24px;">
-                                <div style="font-weight:600; color:#64748b; font-size:12px; text-transform:uppercase; border-bottom:1px solid #e2e8f0; padding-bottom:6px; margin-bottom:12px;">Completados</div>
-                                ${deploymentCompletedHtml}
-                            </div>`;
+                            inner += `
+                            <details style="margin-top:24px;">
+                                <summary style="cursor:pointer; padding: 12px 20px; border-bottom:1px solid #e2e8f0; border-top:1px solid #e2e8f0; margin-bottom:12px; font-weight:600; color:#475569; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; outline:none; background: #f8fafc;">
+                                    ✓ Mostrar Deployments Completados / Pasados 
+                                </summary>
+                                <div style="margin-top: 12px;">
+                                    ${deploymentCompletedHtml}
+                                </div>
+                            </details>`;
                         }
                         depCard.innerHTML = inner || `<div class="empty"><div class="empty-icon">🎉</div><div class="empty-title">All Caught Up</div></div>`;
                     }
