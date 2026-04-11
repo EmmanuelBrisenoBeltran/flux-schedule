@@ -1404,6 +1404,13 @@
                     </svg>
                     Daily Roster
                 </button>
+                <button class="sidebar-item" onclick="showPage('deployments', this)">
+                    <svg class="sidebar-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 20S3 13.92 3 8.5a7 7 0 1114 0c0 5.42-7 11.5-7 11.5zm0-8.5a3 3 0 100-6 3 3 0 000 6z" />
+                    </svg>
+                    Deployments
+                </button>
                 <div class="sidebar-label">People</div>
                 <button class="sidebar-item" onclick="showPage('staff', this)">
                     <svg class="sidebar-icon" viewBox="0 0 20 20" fill="currentColor">
@@ -1509,6 +1516,22 @@
                                     </button>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DEPLOYMENTS -->
+                <div class="page" id="page-deployments">
+                    <div class="page-header">
+                        <div class="page-title">Deployments</div>
+                        <div class="page-desc">Map staff into parking locations and specific zones</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Sofi & Intuit Events</div>
+                        </div>
+                        <div class="card-body" id="page-deployments-list">
+                            Loading...
                         </div>
                     </div>
                 </div>
@@ -1777,6 +1800,22 @@
     </div>
 
     <!-- MODALS -->
+    <div class="modal-overlay" id="modal-deployment">
+        <div class="modal" style="width:750px;">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title" id="deployment-title">Deployment Builder</div>
+                    <div class="modal-subtitle" id="deployment-subtitle"></div>
+                </div><button class="modal-close" onclick="closeModal('modal-deployment')">×</button>
+            </div>
+            <div class="modal-body" id="deployment-body" style="padding-bottom:10px; min-height:300px;">
+            </div>
+            <div class="modal-footer" id="deployment-footer">
+                <button class="btn btn-ghost" onclick="closeModal('modal-deployment')">Cancel</button>
+                <button class="btn btn-primary" onclick="proceedDeploymentAllocation()">Next: Allocate Staff</button>
+            </div>
+        </div>
+    </div>
     <div class="modal-overlay" id="modal-event-view">
         <div class="modal" style="width:600px;">
             <div class="modal-header">
@@ -1978,7 +2017,7 @@
     </script>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzaTt4Uhe9GxtuBwOxN05BfFvI1Ly7fEmrY0LTrvEPqWng5-KaISn-vDNFtyA_pYPJs/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbw1dmfBlfxk88sSxsP99YiKp0NWT5fFvZnu2W9vrKxSf8oyn3XfFe6WJY9XSTb59cpE/exec';
         const LAMBDA_URL = 'https://s4fp3l63xk.execute-api.us-east-1.amazonaws.com';
 
         // ── AUTH ─────────────────────────────────────────────────
@@ -2117,7 +2156,7 @@
             let payload = { access_token, subject, htmlBody };
             if (bcc) payload.bcc = bcc;
             if (to) payload.to = to;
-            
+
             const res = await fetch(LAMBDA_URL + '/create-draft', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -2506,11 +2545,14 @@
             if (!events || !events.length) {
                 if (eventsCard) eventsCard.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><div class="empty-title">No events found</div><div class="empty-desc">There are no events for this month.</div></div>`;
                 if (dashCard) dashCard.innerHTML = `<div class="empty"><div class="empty-icon">📅</div><div class="empty-title">No upcoming events</div></div>`;
+                const depCard = document.getElementById('page-deployments-list');
+                if (depCard) depCard.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><div class="empty-title">No events found</div><div class="empty-desc">There are no events for this month.</div></div>`;
                 return;
             }
             if (eventsCard) {
                 let pendingHtml = '';
                 let completedHtml = '';
+                let deploymentHtml = '';
 
                 events.forEach((evt, i) => {
                     const isCompleted = evt.status === 'Email Sent' || evt.status === 'Generated';
@@ -2527,14 +2569,41 @@
                     } else {
                         pendingHtml += content;
                     }
+
+                    if (isCompleted && (evt.location.toLowerCase().includes('intuit') || evt.location.toLowerCase().includes('sofi'))) {
+                        deploymentHtml += `
+                          <div class="event-row">
+                            <div class="event-dot" style="background:#4ade80;"></div>
+                            <div class="event-info"><div class="event-name">${evt.name}</div><div class="event-meta">${evt.date} · ${evt.location}</div></div>
+                            <span class="badge ${evt.deployments && evt.deployments.length > 0 ? 'badge-green' : 'badge-yellow'}">${evt.deployments && evt.deployments.length > 0 ? Object.keys(evt.deployments).length + ' deployed' : 'Needs deployment'}</span>
+                            <button class="btn btn-primary btn-sm" onclick="viewDeployment(${i})">Map Deployments</button>
+                          </div>`;
+                    }
                 });
 
                 let finalHtml = pendingHtml;
                 if (completedHtml !== '') {
-                    finalHtml += `<div style="margin-top:24px; padding-bottom:8px; border-bottom:1px solid #e2e8f0; margin-bottom:12px; font-weight:600; color:#475569; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;">✓ Completed / Drafted Events</div>` + completedHtml;
+                    finalHtml += `
+                    <details style="margin-top:24px;">
+                        <summary style="cursor:pointer; padding-bottom:8px; border-bottom:1px solid #e2e8f0; margin-bottom:12px; font-weight:600; color:#475569; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; outline:none;">
+                            ✓ Mostrar Eventos Completados / Pasados 
+                        </summary>
+                        <div style="margin-top: 12px; padding-left: 4px;">
+                            ${completedHtml}
+                        </div>
+                    </details>`;
                 }
 
                 eventsCard.innerHTML = finalHtml;
+
+                const depCard = document.getElementById('page-deployments-list');
+                if (depCard) {
+                    if (deploymentHtml === '') {
+                        depCard.innerHTML = `<div class="empty"><div class="empty-icon">📍</div><div class="empty-title">No eligible events</div><div class="empty-desc">Completed events for Intuit Dome and Sofi Stadium will appear here.</div></div>`;
+                    } else {
+                        depCard.innerHTML = deploymentHtml;
+                    }
+                }
             }
             if (dashCard) {
                 const today = new Date();
@@ -2708,11 +2777,24 @@
 
                 // Evaluate Blackout Days for the Roster
                 const dayOfMonthStr = parseInt(dateParts[2]).toString();
+                const fullDateStr = `${parseInt(dateParts[1])}/${parseInt(dateParts[2])}`;
+                const fullDateYearStr = `${parseInt(dateParts[1])}/${parseInt(dateParts[2])}/${dateParts[0]}`;
                 let blackoutNames = new Set();
                 STAFF_DATA.forEach(st => {
                     if (st.blackoutDays) {
+                        const evtDObj = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
                         const bDays = st.blackoutDays.split(',').map(d => d.trim());
-                        if (bDays.includes(dayOfMonthStr)) {
+                        let isBlackout = false;
+                        for (let b of bDays) {
+                            if (b === dayOfMonthStr) { isBlackout = true; break; }
+                            const dParts = b.split(/[/-]/);
+                            if (dParts.length >= 2) {
+                                let m = parseInt(dParts[0]); let d = parseInt(dParts[1]);
+                                if (b.includes('-') && dParts[0].length === 4) { m = parseInt(dParts[1]); d = parseInt(dParts[2]); }
+                                if (m === (evtDObj.getMonth() + 1) && d === evtDObj.getDate()) { isBlackout = true; break; }
+                            }
+                        }
+                        if (isBlackout) {
                             blackoutNames.add(st.fullName);
                         }
                     }
@@ -2891,12 +2973,27 @@
                             try {
                                 const evtDateObj = new Date(evt.date);
                                 const dayOfMonth = evtDateObj.getDate().toString();
+                                const fullDateStr = `${evtDateObj.getMonth() + 1}/${evtDateObj.getDate()}`;
+                                const fullDateYearStr = `${evtDateObj.getMonth() + 1}/${evtDateObj.getDate()}/${evtDateObj.getFullYear()}`;
                                 const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
                                 const dayName = days[evtDateObj.getDay()];
 
                                 if (st.blackoutDays) {
                                     const bDays = st.blackoutDays.split(',').map(d => d.trim());
-                                    if (bDays.includes(dayOfMonth)) {
+                                    const evtDObj = new Date(evt.date);
+                                    const dayOfMonth = evtDObj.getDate().toString();
+
+                                    let isBlackout = false;
+                                    for (let b of bDays) {
+                                        if (b === dayOfMonth) { isBlackout = true; break; }
+                                        const dParts = b.split(/[/-]/);
+                                        if (dParts.length >= 2) {
+                                            let m = parseInt(dParts[0]); let d = parseInt(dParts[1]);
+                                            if (b.includes('-') && dParts[0].length === 4) { m = parseInt(dParts[1]); d = parseInt(dParts[2]); }
+                                            if (m === (evtDObj.getMonth() + 1) && d === evtDObj.getDate()) { isBlackout = true; break; }
+                                        }
+                                    }
+                                    if (isBlackout) {
                                         warning = ' ⚠️ (Blackout Day)';
                                     }
                                 }
@@ -2993,7 +3090,7 @@
                     body: JSON.stringify({ action: 'saveAssignments', event: evt })
                 });
                 showToast('✓ Staff removed and saved!', 'success');
-            } catch(e) {
+            } catch (e) {
                 console.error(e);
             }
 
@@ -3040,7 +3137,7 @@
                     body: JSON.stringify({ action: 'saveAssignments', event: evt })
                 });
                 showToast('✓ Staff added and saved!', 'success');
-            } catch(e) {
+            } catch (e) {
                 console.error(e);
             }
 
@@ -3080,7 +3177,7 @@
                     body: JSON.stringify({ action: 'saveAssignments', event: evt })
                 });
                 showToast('✓ New shift added!', 'success');
-            } catch(e) {
+            } catch (e) {
                 console.error(e);
             }
 
@@ -3432,10 +3529,21 @@
                         if (fulfilled >= count) return;
                         if (alreadyAssignedIds.has(staffIdx)) return;
 
-                        const dayOfMonthStr = dateObj.getDate().toString();
                         if (s.blackoutDays) {
                             const bDays = s.blackoutDays.split(',').map(d => d.trim());
-                            if (bDays.includes(dayOfMonthStr)) return;
+                            const dayOfMonthStr = dateObj.getDate().toString();
+
+                            let isBlackout = false;
+                            for (let b of bDays) {
+                                if (b === dayOfMonthStr) { isBlackout = true; break; }
+                                const dParts = b.split(/[/-]/);
+                                if (dParts.length >= 2) {
+                                    let m = parseInt(dParts[0]); let d = parseInt(dParts[1]);
+                                    if (b.includes('-') && dParts[0].length === 4) { m = parseInt(dParts[1]); d = parseInt(dParts[2]); }
+                                    if (m === (dateObj.getMonth() + 1) && d === dateObj.getDate()) { isBlackout = true; break; }
+                                }
+                            }
+                            if (isBlackout) return;
                         }
 
                         const staffAvail = s[availKey] ? s[availKey].trim() : '';
@@ -3631,6 +3739,162 @@
                 else alert('Error: ' + json.message);
             } catch (e) { alert('Connection error.'); }
             finally { btn.textContent = 'Create Draft in My Gmail'; btn.disabled = false; }
+        }
+
+        // ── DEPLOYMENT BUILDER ───────────────────────────────────────
+        let currentDeploymentEventIndex = -1;
+        let currentDeploymentState = {};
+        const PARKING_LOCATIONS = ['Office', 'Players', 'East', 'East - 102nd', 'Players - Internal', 'Players - 102nd & Doty', 'West - Prairie', 'West - Office', 'West - Century'];
+
+        function viewDeployment(evtIdx) {
+            if (!EVENTS_DATA || !EVENTS_DATA[evtIdx]) return;
+            currentDeploymentEventIndex = evtIdx;
+            const evt = EVENTS_DATA[evtIdx];
+
+            document.getElementById('deployment-title').textContent = evt.name;
+            document.getElementById('deployment-subtitle').textContent = evt.date + ' • Build Layout';
+
+            currentDeploymentState = JSON.parse(JSON.stringify(evt.deployments || {}));
+
+            renderDeploymentConfigStep();
+            openModal('modal-deployment');
+        }
+
+        function renderDeploymentConfigStep() {
+            const evt = EVENTS_DATA[currentDeploymentEventIndex];
+            if (!evt.assignedList || evt.assignedList.length === 0) {
+                document.getElementById('deployment-body').innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">No shifts found!</div><div class="empty-desc">Generate shifts and assign staff first.</div></div>';
+                document.getElementById('deployment-footer').innerHTML = `<button class="btn btn-ghost" onclick="closeModal('modal-deployment')">Cancel</button>`;
+                return;
+            }
+
+            let html = `<div style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Step 1: Select parking locations active for each shift hour.</div>`;
+
+            evt.assignedList.forEach(shiftObj => {
+                const time = shiftObj.time;
+                if (!currentDeploymentState[time]) currentDeploymentState[time] = {};
+
+                html += `<div style="margin-bottom:16px; border:1px solid #e2e8f0; border-radius:6px; padding:12px;">
+                         <div style="font-weight:600; margin-bottom:8px;">Shift: ${time}</div>
+                         <div style="display:flex; flex-wrap:wrap; gap:8px;">`;
+
+                PARKING_LOCATIONS.forEach(loc => {
+                    const isChecked = currentDeploymentState[time][loc] !== undefined;
+                    html += `<label style="display:flex; align-items:center; gap:6px; background:#f8fafc; padding:6px 10px; border-radius:4px; font-size:12px; border:1px solid #cbd5e1; cursor:pointer;">
+                              <input type="checkbox" onchange="toggleDeploymentLocation('${time}', '${loc}', this.checked)" ${isChecked ? 'checked' : ''}>
+                              ${loc}
+                            </label>`;
+                });
+                html += `</div></div>`;
+            });
+
+            document.getElementById('deployment-body').innerHTML = html;
+            document.getElementById('deployment-footer').innerHTML = `
+                <button class="btn btn-ghost" onclick="closeModal('modal-deployment')">Cancel</button>
+                <button class="btn btn-primary" onclick="renderDeploymentAllocationStep()">Next: Allocate Staff</button>
+            `;
+        }
+
+        function toggleDeploymentLocation(time, loc, isChecked) {
+            if (isChecked) { currentDeploymentState[time][loc] = currentDeploymentState[time][loc] || []; }
+            else { delete currentDeploymentState[time][loc]; }
+        }
+
+        function renderDeploymentAllocationStep() {
+            const evt = EVENTS_DATA[currentDeploymentEventIndex];
+            let html = `<div style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Step 2: Assign specific staff to your chosen locations.</div>`;
+
+            evt.assignedList.forEach(shiftObj => {
+                const time = shiftObj.time;
+                const activeLocations = currentDeploymentState[time];
+                if (!activeLocations || Object.keys(activeLocations).length === 0) return;
+
+                html += `<div style="margin-bottom:20px; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">
+                            <div style="background:var(--navy); color:white; padding:10px 16px; font-weight:600; font-size:13px;">Shift: ${time}</div>
+                            <div style="padding:16px;">`;
+
+                const pool = shiftObj.staff.map(s => s.fullName);
+                const assignedNames = new Set();
+                Object.keys(activeLocations).forEach(loc => {
+                    (activeLocations[loc] || []).forEach(n => assignedNames.add(n));
+                });
+
+                html += `<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">`;
+                Object.keys(activeLocations).forEach(loc => {
+                    html += `<div style="border:1px solid #e2e8f0; border-radius:6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                                <div style="background:#f8fafc; padding:8px 12px; font-weight:600; font-size:12px; border-bottom:1px solid #e2e8f0;">${loc}</div>
+                                <div style="padding:8px; min-height:40px; display:flex; flex-direction:column; gap:4px;">`;
+
+                    const assigned = activeLocations[loc] || [];
+                    assigned.forEach(name => {
+                        html += `<div style="display:flex; align-items:center; justify-content:space-between; background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:4px; font-size:12px;">
+                                    ${name}
+                                    <button onclick="removeDeploymentStaff('${time}', '${loc}', '${name.replace(/'/g, "\\'")}')" style="background:none; border:none; cursor:pointer; color:#0c4a6e; font-size:14px; padding:0 4px;">×</button>
+                                 </div>`;
+                    });
+
+                    const unassigned = pool.filter(n => !assignedNames.has(n));
+                    if (unassigned.length > 0) {
+                        const tId = time.replace(/[^a-zA-Z0-9]/g, '');
+                        const lId = loc.replace(/[^a-zA-Z0-9]/g, '');
+                        html += `<div style="display:flex; gap:6px; margin-top:8px;">
+                                    <select id="sel-dep-${tId}-${lId}" style="flex:1; font-size:12px; border:1px solid #cbd5e1; border-radius:4px; padding:4px;">
+                                        <option value="" disabled selected>Assign staff...</option>
+                                        ${unassigned.map(n => `<option value="${n.replace(/"/g, '&quot;')}">${n}</option>`).join('')}
+                                    </select>
+                                    <button class="btn btn-primary" style="padding:4px 8px; font-size:12px; min-height:0; height:auto;" onclick="addDeploymentStaff('${time}', '${loc}', '${tId}', '${lId}')">Add</button>
+                                 </div>`;
+                    } else if (assigned.length === 0) {
+                        html += `<div style="font-size:11px; color:#94a3b8; font-style:italic;">No staff available</div>`;
+                    }
+
+                    html += `   </div></div>`;
+                });
+                html += `</div></div></div>`;
+            });
+
+            document.getElementById('deployment-body').innerHTML = html;
+            document.getElementById('deployment-footer').innerHTML = `
+                <button class="btn btn-ghost" onclick="renderDeploymentConfigStep()">← Back to Locations</button>
+                <button class="btn btn-success" onclick="saveActiveDeployment()" id="btn-save-dep">Save All Deployments</button>
+            `;
+        }
+
+        function addDeploymentStaff(time, loc, timeId, locId) {
+            const sel = document.getElementById(`sel-dep-${timeId}-${locId}`);
+            if (!sel || !sel.value) return;
+            const name = sel.value;
+            if (!currentDeploymentState[time][loc]) currentDeploymentState[time][loc] = [];
+            currentDeploymentState[time][loc].push(name);
+            renderDeploymentAllocationStep();
+        }
+
+        function removeDeploymentStaff(time, loc, name) {
+            if (currentDeploymentState[time][loc]) {
+                currentDeploymentState[time][loc] = currentDeploymentState[time][loc].filter(n => n !== name);
+            }
+            renderDeploymentAllocationStep();
+        }
+
+        async function saveActiveDeployment() {
+            const btn = document.getElementById('btn-save-dep');
+            btn.textContent = 'Saving...'; btn.disabled = true;
+            try {
+                const evt = EVENTS_DATA[currentDeploymentEventIndex];
+                evt.deployments = currentDeploymentState;
+
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'saveDeployments', event: evt })
+                });
+                const json = await res.json();
+                if (json.status === 'ok') {
+                    showToast('✓ Deployments saved dynamically', 'success');
+                    closeModal('modal-deployment');
+                    if (typeof renderEventsFromSheet === 'function') renderEventsFromSheet(EVENTS_DATA);
+                } else alert('Error: ' + json.message);
+            } catch (e) { alert('Connection error.'); }
+            finally { btn.textContent = 'Save All Deployments'; btn.disabled = false; }
         }
 
         // ── OAUTH CALLBACK DETECTION ──────────────────────────────
