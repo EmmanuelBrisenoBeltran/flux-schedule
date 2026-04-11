@@ -2664,21 +2664,21 @@
             const hasShifts = (e) => ['Shifts Built', 'Staff Assigned', 'Generated'].includes(e.status);
             const hasAssignment = (e) => ['Staff Assigned', 'Generated'].includes(e.status);
 
-            const allOpts = events.map((e, i) => `<option value="${i}">${e.name} — ${e.date}</option>`).join('');
+            const allOpts = events.map((e, i) => `<option value="${i}">${e.name} — ${e.date} (${e.location || 'No Location'})</option>`).join('');
 
             const assignableOpts = events.filter(hasShifts).map(e => {
                 const i = events.indexOf(e);
-                return `<option value="${i}">${e.name} — ${e.date}</option>`;
+                return `<option value="${i}">${e.name} — ${e.date} (${e.location || 'No Location'})</option>`;
             }).join('');
 
             const assignedOpts = events.filter(hasAssignment).map(e => {
                 const i = events.indexOf(e);
-                return `<option value="${i}">${e.name} — ${e.date}</option>`;
+                return `<option value="${i}">${e.name} — ${e.date} (${e.location || 'No Location'})</option>`;
             }).join('');
 
             const clientOpts = events.filter(e => hasAssignment(e) && e.location && e.location.toLowerCase().includes('intuit')).map(e => {
                 const i = events.indexOf(e);
-                return `<option value="${i}">${e.name} — ${e.date}</option>`;
+                return `<option value="${i}">${e.name} — ${e.date} (${e.location || 'No Location'})</option>`;
             }).join('');
 
             const configs = {
@@ -3752,7 +3752,7 @@
             const evt = EVENTS_DATA[evtIdx];
 
             document.getElementById('deployment-title').textContent = evt.name;
-            document.getElementById('deployment-subtitle').textContent = evt.date + ' • Build Layout';
+            document.getElementById('deployment-subtitle').textContent = evt.date + ' • ' + evt.location + ' • Build Layout';
 
             currentDeploymentState = JSON.parse(JSON.stringify(evt.deployments || {}));
 
@@ -3801,6 +3801,11 @@
         }
 
         function renderDeploymentAllocationStep() {
+            const activeSelects = {};
+            document.querySelectorAll('select[id^="sel-dep-"]').forEach(sel => {
+                if (sel.value) activeSelects[sel.id] = sel.value;
+            });
+
             const evt = EVENTS_DATA[currentDeploymentEventIndex];
             let html = `<div style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Step 2: Assign specific staff to your chosen locations.</div>`;
 
@@ -3854,6 +3859,16 @@
             });
 
             document.getElementById('deployment-body').innerHTML = html;
+            
+            Object.keys(activeSelects).forEach(id => {
+                const sel = document.getElementById(id);
+                // Check if the previously selected unassigned name is still an option
+                if (sel) {
+                    const optExists = Array.from(sel.options).some(o => o.value === activeSelects[id]);
+                    if (optExists) sel.value = activeSelects[id];
+                }
+            });
+            
             document.getElementById('deployment-footer').innerHTML = `
                 <button class="btn btn-ghost" onclick="renderDeploymentConfigStep()">← Back to Locations</button>
                 <button class="btn btn-success" onclick="saveActiveDeployment()" id="btn-save-dep">Save All Deployments</button>
