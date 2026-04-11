@@ -2017,7 +2017,7 @@
     </script>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbw1dmfBlfxk88sSxsP99YiKp0NWT5fFvZnu2W9vrKxSf8oyn3XfFe6WJY9XSTb59cpE/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbymBRxE_3nvfEtxv8tOQ1XaJlaMgyUISA0iR6ZlokaminODhWsY8iiEvQ-vYAM_b9Yo/exec';
         const LAMBDA_URL = 'https://s4fp3l63xk.execute-api.us-east-1.amazonaws.com';
 
         // ── AUTH ─────────────────────────────────────────────────
@@ -2577,8 +2577,15 @@
                           <div class="event-row">
                             <div class="event-dot" style="background:${hasDeployment ? '#cbd5e1' : '#4ade80'};"></div>
                             <div class="event-info"><div class="event-name">${evt.name}</div><div class="event-meta">${evt.date} · ${evt.location}</div></div>
-                            <span class="badge ${hasDeployment ? 'badge-green' : 'badge-yellow'}">${hasDeployment ? Object.keys(evt.deployments).length + ' shifts deployed' : 'Needs deployment'}</span>
-                            <button class="btn btn-primary btn-sm" onclick="${hasDeployment ? `viewReadOnlyDeployment(${i})` : `viewDeployment(${i})`}">${hasDeployment ? 'View' : 'Map Deployments'}</button>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span class="badge ${hasDeployment ? 'badge-green' : 'badge-yellow'}">${hasDeployment ? Object.keys(evt.deployments).length + ' shifts deployed' : 'Needs deployment'}</span>
+                                ${hasDeployment && evt.deploymentEmailSent ? `<span class="badge badge-green" style="background:#dcfce7; color:#166534; border:1px solid #bbf7d0;">📩 Emailed</span>` : ''}
+                            </div>
+                            <div style="display:flex; gap:6px;">
+                                ${hasDeployment && !evt.deploymentEmailSent ? `<button class="btn btn-secondary btn-sm" onclick="sendDeploymentEmail(${i}, this)" style="background:#e2e8f0; color:#475569; border:none; border-radius:4px; padding:4px 10px; font-weight:500; cursor:pointer;">✉️ Gmail</button>` : ''}
+                                ${hasDeployment && evt.deploymentEmailSent ? `<button class="btn btn-ghost btn-sm" onclick="sendDeploymentEmail(${i}, this)" style="color:#64748b; background:transparent; border:none; padding:4px 6px; cursor:pointer;" title="Resend Email">✉️ Re-Draft</button>` : ''}
+                                <button class="btn btn-primary btn-sm" onclick="${hasDeployment ? `viewReadOnlyDeployment(${i})` : `viewDeployment(${i})`}">${hasDeployment ? 'View' : 'Map Deployments'}</button>
+                            </div>
                           </div>`;
                         if (hasDeployment) deploymentCompletedHtml += dHtml;
                         else deploymentPendingHtml += dHtml;
@@ -3125,7 +3132,7 @@
             const selectId = `add-staff-select-${evtIdx}-${shiftTime.replace(/[\s:]/g, '')}`;
             const select = document.getElementById(selectId);
             if (!select) return;
-            
+
             const selectedNames = Array.from(select.selectedOptions).map(opt => opt.value).filter(val => val !== "");
             if (selectedNames.length === 0) return;
 
@@ -3134,7 +3141,7 @@
             let addedCount = 0;
             selectedNames.forEach(fullName => {
                 if (shiftObj.staff.some(s => s.fullName === fullName)) return;
-                
+
                 const fullStaff = STAFF_DATA.find(s => s.fullName === fullName);
                 if (!fullStaff) return;
 
@@ -3767,14 +3774,50 @@
         }
 
         // ── DEPLOYMENT BUILDER ───────────────────────────────────────
+
+        async function sendDeploymentEmail(evtIdx, btn) {
+            const evt = EVENTS_DATA[evtIdx];
+            if (!evt) return;
+
+            const ogText = btn.innerHTML;
+            btn.innerHTML = `<span class="spinner" style="width:12px; height:12px; border-width:2px; display:inline-block; vertical-align:middle;"></span> Sending...`;
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'draftDeploymentEmail',
+                        event: evt,
+                        staffData: STAFF_DATA
+                    })
+                });
+                const json = await res.json();
+
+                if (json.status === 'ok') {
+                    showToast('✓ ' + json.message + ' (To: ' + json.recipients + ' managers)', 'success');
+                    evt.deploymentEmailSent = true;
+                    if (typeof renderEventsFromSheet === 'function') renderEventsFromSheet(EVENTS_DATA);
+                } else {
+                    alert('Error: ' + json.message);
+                    btn.innerHTML = ogText;
+                }
+            } catch (e) {
+                alert('Connection error.');
+                btn.innerHTML = ogText;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
         let currentDeploymentEventIndex = -1;
         let currentDeploymentState = {};
         const PARKING_LOCATIONS = [
-            'Office', 
-            'Players (Inside)', 'Players (Gate)', 
-            'East', 'East - 102nd', 
-            'Players - Internal', 'Players - 102nd & Doty', 
-            'West - Prairie (Ramp)', 'West - Prairie (L1)', 'West - Prairie (L2)', 'West - Prairie (L3)', 'West - Prairie (L4)', 'West - Prairie (L5)', 
+            'Office',
+            'Players (Inside)', 'Players (Gate)',
+            'East', 'East - 102nd',
+            'Players - Internal', 'Players - 102nd & Doty',
+            'West - Prairie (Ramp)', 'West - Prairie (L1)', 'West - Prairie (L2)', 'West - Prairie (L3)', 'West - Prairie (L4)', 'West - Prairie (L5)',
             'West - Office', 'West - Century'
         ];
 
@@ -3810,17 +3853,17 @@
                     const time = shiftObj.time;
                     const activeLocations = currentDeploymentState[time];
                     if (!activeLocations || Object.keys(activeLocations).length === 0) return;
-                    
+
                     html += `<div style="margin-bottom:20px; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">
                                 <div style="background:var(--navy); color:white; padding:10px 16px; font-weight:600; font-size:13px;">Shift: ${time}</div>
                                 <div style="padding:16px;">
                                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">`;
-                    
+
                     Object.keys(activeLocations).forEach(loc => {
                         html += `<div style="border:1px solid #e2e8f0; border-radius:6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
                                     <div style="background:#f8fafc; padding:8px 12px; font-weight:600; font-size:12px; border-bottom:1px solid #e2e8f0;">${loc}</div>
                                     <div style="padding:8px; display:flex; flex-direction:column; gap:4px;">`;
-                        
+
                         const assigned = activeLocations[loc] || [];
                         if (assigned.length === 0) {
                             html += `<div style="font-size:11px; color:#94a3b8; font-style:italic;">No staff</div>`;
@@ -3946,7 +3989,7 @@
             });
 
             document.getElementById('deployment-body').innerHTML = html;
-            
+
             Object.keys(activeSelects).forEach(id => {
                 const sel = document.getElementById(id);
                 // Check if the previously selected unassigned name is still an option
@@ -3955,7 +3998,7 @@
                     if (optExists) sel.value = activeSelects[id];
                 }
             });
-            
+
             document.getElementById('deployment-footer').innerHTML = `
                 <button class="btn btn-ghost" onclick="renderDeploymentConfigStep()">← Back to Locations</button>
                 <button class="btn btn-success" onclick="saveActiveDeployment()" id="btn-save-dep">Save All Deployments</button>
